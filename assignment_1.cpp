@@ -2,106 +2,36 @@
 
 #include <math.h>
 #include <stdio.h>
-#include <iostream>
-#include <fstream>
 #include <climits>
 #include <GL/freeglut.h>
+#include "open_off.h"
+#include "castle_rendering.h"
+#include "cannon.h"
 
-using namespace std;
 
 int angle = -90;
 int camera_x_offset = 0;
 int camera_z_offset = 0;
-
 
 float dx = 0;
 float dz = 0;
 float camx = 7.5;
 float camz = 30;
 
+float white[4] = {1.0, 1.0, 1.0, 1.0};
+float grey[4] = {0.2, 0.2, 0.2, 1.0};
+float black[4] = {0.0, 0.0, 0.0, 1.0};
+
 // ********************* FOR OFF FILE LOADING *********************
 //Castle Entrance Variables
 float *x_castle, *y_castle, *z_castle;  //vertex coordinate arrays
 int *t1_castle, *t2_castle, *t3_castle; //triangles
 int nvrt_castle, ntri_castle;    //total number of vertices and triangles
-//float xmin_castle, xmax_castle, ymin_castle, ymax_castle; //min, max values of  object coordinates
 
 //Cannon Variables
 float *x_cannon, *y_cannon, *z_cannon;
 int *t1_cannon, *t2_cannon, *t3_cannon;
 int nvrt_cannon, ntri_cannon;
-
-
-void loadMeshFile(const char* fname, float* x[], float* y[], float* z[], int* t1[], int* t2[], int* t3[], int* nvrt, int* ntri)  
-{
-    
-    
-	ifstream fp_in;
-	int num, ne;
-
-	fp_in.open(fname, ios::in);
-	if(!fp_in.is_open())
-	{
-		cout << "Error opening mesh file" << endl;
-		exit(1);
-	}
-
-	fp_in.ignore(INT_MAX, '\n');				//ignore first line
-	fp_in >> *nvrt >> *ntri >> ne;			    // read number of vertices, polygons, edges
-
-    *x = new float[*nvrt];                        //create arrays
-    *y = new float[*nvrt];
-    *z = new float[*nvrt];
-
-    *t1 = new int[*ntri];
-    *t2 = new int[*ntri];
-    *t3 = new int[*ntri];
-
-	for(int i=0; i < *nvrt; i++)                         //read vertex list 
-		fp_in >> (*x)[i] >> (*y)[i] >> (*z)[i];
-        
-
-	for(int i=0; i < *ntri; i++)                         //read polygon list 
-	{
-		fp_in >> num >> (*t1)[i] >> (*t2)[i] >> (*t3)[i];
-		if(num != 3)
-		{
-			cout << "ERROR: Polygon with index " << i  << " is not a triangle." << endl;  
-			exit(1);
-		}
-	}
-
-	fp_in.close();
-	cout << " File successfully read." << endl;
-}
-/*
-//-- Computes the min, max values of coordinates  -----------------------
-void computeMinMax()
-{
-	xmin = xmax = x[0];
-	ymin = ymax = y[0];
-	for(int i = 1; i < nvrt; i++)
-	{
-		if(x[i] < xmin) xmin = x[i];
-		else if(x[i] > xmax) xmax = x[i];
-		if(y[i] < ymin) ymin = y[i];
-		else if(y[i] > ymax) ymax = y[i];
-	}
-}*/
-
-//--Function to compute the normal vector of a triangle with index tindx ----------
-void normal(int tindx, float* x, float* y, float* z, int* t1, int* t2, int* t3)
-{
-	float x1 = x[t1[tindx]], x2 = x[t2[tindx]], x3 = x[t3[tindx]];
-	float y1 = y[t1[tindx]], y2 = y[t2[tindx]], y3 = y[t3[tindx]];
-	float z1 = z[t1[tindx]], z2 = z[t2[tindx]], z3 = z[t3[tindx]];
-	float nx, ny, nz;
-	nx = y1*(z2-z3) + y2*(z3-z1) + y3*(z1-z2);
-	ny = z1*(x2-x3) + z2*(x3-x1) + z3*(x1-x2);
-	nz = x1*(y2-y3) + x2*(y3-y1) + x3*(y1-y2);
-	glNormal3f(nx, ny, nz);
-}
-
 
 
 void drawFloor()
@@ -172,160 +102,6 @@ void draw_axis (void)
 }
 
 
-void draw_octagon(int x, int y, int z)
-/* Takes the normal vector to the octagon and draws an octagon at with 
- * centre at (0, 0, 0) and with each side having length 1 */
-{
-    glPushMatrix();
-        glRotatef(atan(0.5 / (0.5 + sqrt(0.5))) * (180 / M_PI), 0, 0, 1);
-        glTranslatef(-(0.5 + sqrt(0.5)), -(0.5 + sqrt(0.5)), 0); //Moves the centre of the octagon to 0, 0, 0
-        glTranslatef(0, -(1 - sqrt(0.5)), 0); //Moves the octagon down so that the bottom of the octagon touches the x axis
-        glBegin(GL_POLYGON); 
-            glNormal3f(x, y, z);
-            glVertex3f(0, 1, 0);
-            glVertex3f(0, 2, 0);
-            glVertex3f(sqrt(0.5), 2 + sqrt(0.5), 0);
-            glVertex3f(sqrt(0.5) + 1, 2 + sqrt(0.5), 0);
-            glVertex3f(sqrt(0.5) * 2 + 1, 2, 0);
-            glVertex3f(sqrt(0.5) * 2 + 1, 1, 0);
-            glVertex3f(sqrt(0.5) + 1, 1 - sqrt(0.5), 0);
-            glVertex3f(sqrt(0.5), 1 - sqrt(0.5), 0);
-        glEnd();
-    glPopMatrix();
-}
-
-
-void draw_pillar (int height)
-{
-    //Draws the bottom of the pillar (an octagon)
-    glPushMatrix();
-        glTranslatef(0, 0, 0.01);
-        draw_octagon(0, 0, -1);
-    glPopMatrix();
-    
-    //draws the sides of the pillar
-    GLUquadricObj* p = gluNewQuadric();
-    glPushMatrix();
-        glRotatef(0, 1, 0, 0);
-        gluCylinder(p, sqrt(0.5) + 0.6, sqrt(0.5) + 0.6, height, 8, 8);
-    glPopMatrix();
-    
-    //Draws the top of the pillar (an octagon)
-    glPushMatrix();
-        glTranslatef(0, 0, 9.99);
-        draw_octagon(0, 0, 1);
-    glPopMatrix();
-}
-
-
-void draw_castle_entrance (void)
-{
-    glBegin(GL_TRIANGLES);
-        for(int tindx = 0; tindx < ntri_castle; tindx++)
-        {
-           normal(tindx, x_castle, y_castle, z_castle, t1_castle, t2_castle, t3_castle);
-           glVertex3d(x_castle[t1_castle[tindx]], y_castle[t1_castle[tindx]], z_castle[t1_castle[tindx]]);
-           glVertex3d(x_castle[t2_castle[tindx]], y_castle[t2_castle[tindx]], z_castle[t2_castle[tindx]]);
-           glVertex3d(x_castle[t3_castle[tindx]], y_castle[t3_castle[tindx]], z_castle[t3_castle[tindx]]);
-        }
-    glEnd();
-}
-
-
-void draw_castle_walls(void)
-{
-    //Drawing minor pillars
-    glPushMatrix();
-        glTranslatef(-7.5, 0, -13);
-        glRotatef(-90, 1, 0, 0);
-        draw_pillar(10);
-    glPopMatrix();
-    
-    glPushMatrix();
-        glTranslatef(15 + 7.5, 0, -13);
-        glRotatef(-90, 1, 0, 0);
-        draw_pillar(10);
-    glPopMatrix();
-    
-    glPushMatrix();
-        glTranslatef(0, 0, -13 * 2);
-        glRotatef(-90, 1, 0, 0);
-        draw_pillar(10);
-    glPopMatrix();
-    
-    glPushMatrix();
-        glTranslatef(15, 0, -13 * 2);
-        glRotatef(-90, 1, 0, 0);
-        draw_pillar(10);
-    glPopMatrix();
-    
-    
-    //Drawing connecting walls
-    glPushMatrix();
-        glRotatef(90 + asin(7.5 / 15) * (180 / M_PI), 0, 1, 0);
-        glTranslatef(15/2.0, 9/2.0, 0);
-        glScalef(15, 9, 1);
-        glutSolidCube(1.0);
-    glPopMatrix();
-    
-    glPushMatrix();
-        glTranslatef(0, 0, -13 * 2);
-        glRotatef(-90 - asin(7.5 / 15) * (180 / M_PI), 0, 1, 0);
-        glTranslatef(15/2.0, 9/2.0, 0);
-        glScalef(15, 9, 1);
-        glutSolidCube(1.0);
-    glPopMatrix();
-    
-    glPushMatrix();
-        glTranslatef(0, 0, -13 * 2);
-        glTranslatef(15/2.0, 9/2.0, 0);
-        glScalef(15, 9, 1);
-        glutSolidCube(1.0);
-    glPopMatrix();
-    
-    glPushMatrix();
-        glTranslatef(15, 0, -13 * 2);
-        glRotatef(-90 + asin(7.5 / 15) * (180 / M_PI), 0, 1, 0);
-        glTranslatef(15/2.0, 9/2.0, 0);
-        glScalef(15, 9, 1);
-        glutSolidCube(1.0);
-    glPopMatrix();
-    
-    glPushMatrix();
-        glTranslatef(15 + 7.5, 0, -13);
-        glRotatef(-90 - asin(7.5 / 15) * (180 / M_PI), 0, 1, 0);
-        glTranslatef(15/2.0, 9/2.0, 0);
-        glScalef(15, 9, 1);
-        glutSolidCube(1.0);
-    glPopMatrix();
-}
-
-
-void draw_castle (void) 
-{
-    /* *** ENTRANCE *** */
-    //Right entrance pillar
-    glPushMatrix();
-        glRotatef(-90, 1, 0, 0);
-        draw_pillar(14);
-    glPopMatrix();
-    
-    //castle castle entrance
-    glPushMatrix();
-        glTranslatef((sqrt(0.5) + 0.6) / 2, 0, (sqrt(0.5) + 0.6) / 2);
-        draw_castle_entrance();
-    glPopMatrix();
-    
-    //Left entrance pillar
-    glPushMatrix();
-        glTranslatef(15, 0, 0);
-        glRotatef(-90, 1, 0, 0);
-        draw_pillar(14);
-    glPopMatrix();
-    
-    /* *** WALLS *** */ 
-    draw_castle_walls();
-}
 
 void display (void)
 {
@@ -339,9 +115,9 @@ void display (void)
     dx = cos(angle * (M_PI/180));
     dz = sin(angle * (M_PI/180));
     
-    gluLookAt(camx, 10, camz, camx+dx, 10, camz+dz,0.0f, 1.0f, 0.0f);
+    gluLookAt(camx, 3, camz, camx+dx, 3, camz+dz, 0.0, 1.0, 0.0);
     
-    //gluLookAt(7.5, 20, 30 + camera_z_offset, 7.5, 8, camera_z_offset, 0, 1, 0);
+    //gluLookAt(7.5, 0, 30 + camera_z_offset, 7.5, 8, camera_z_offset, 0, 1, 0);
     
     //glTranslatef(0, 0, 0 + camera_z_offset * 2);
     //glRotatef(angle, 0, 1, 0);
@@ -356,11 +132,20 @@ void display (void)
     
     glDisable(GL_LIGHTING);
     drawFloor();
-    
     glEnable(GL_LIGHTING);
-    glColor3f(0.0, 0.0, 1.0);
     
-    draw_castle();
+    glPushMatrix();
+        glColor3f(0.0, 0.0, 1.0);
+        glTranslatef(20, 0, 0);
+        draw_castle(x_castle, y_castle, z_castle, t1_castle, t2_castle, t3_castle, ntri_castle);
+    glPopMatrix();
+    
+    //Enable specular lighting for cannon and draw cannon
+    glPushMatrix();
+        glTranslatef(10, 1, 10);
+        glScalef(0.06, 0.06, 0.06);
+        draw_cannon(x_cannon, y_cannon, z_cannon, t1_cannon, t2_cannon, t3_cannon, ntri_cannon);
+    glPopMatrix();
     
     glutSwapBuffers();
 }
@@ -371,13 +156,22 @@ void initialize (void)
 {
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     
-    loadMeshFile("./castle_gate.off", &x_castle, &y_castle, &z_castle, &t1_castle, &t2_castle, &t3_castle, &nvrt_castle, &ntri_castle);	
-    loadMeshFile("./Cannon.off", &x_cannon, &y_cannon, &z_cannon, &t1_cannon, &t2_cannon, &t3_cannon, &nvrt_cannon, &ntri_cannon);
+    load_mesh_file("./castle_gate.off", &x_castle, &y_castle, &z_castle, &t1_castle, &t2_castle, &t3_castle, &nvrt_castle, &ntri_castle);	
+    load_mesh_file("./Cannon.off", &x_cannon, &y_cannon, &z_cannon, &t1_cannon, &t2_cannon, &t3_cannon, &nvrt_cannon, &ntri_cannon);
     
     glEnable(GL_LIGHTING); //Turn on lights
     glEnable(GL_LIGHT0);
     
-    glEnable(GL_COLOR_MATERIAL);
+    glLightfv(GL_LIGHT0, GL_AMBIENT, grey); //the passive light coming from all directions is a light grey
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, white); //white light
+    glLightfv(GL_LIGHT0, GL_SPECULAR, white); //white light
+    
+    glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE); //Let ambient and diffuse colours track the current colour
+    glEnable(GL_COLOR_MATERIAL); //Enable the above setting
+    
+    //glMaterialfv(GL_FRONT, GL_SPECULAR, white); //Make the specular color white for all objects?
+    glMaterialf(GL_FRONT, GL_SHININESS, 30); //Make the radius of the specular highlight large-ish
+    
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_NORMALIZE);
     
@@ -400,7 +194,7 @@ int main(int argc, char** argv)
     initialize();
     glutDisplayFunc(display);
     glutSpecialFunc(special);
-    //glutKeyboardFunc(angle_rotate);
+    glutKeyboardFunc(keyboard);
     glutMainLoop();
     return 0;
 }
