@@ -5,12 +5,24 @@
 #define CANNON_H
 #define GL_SILENCE_DEPRECATION 0
 
+#include <math.h>
 #include <GL/freeglut.h>
 #include "open_off.h"
 
+typedef struct cannon_ball_s
+{
+    float x;
+    float y;
+    float z;
+    float velocity_x;
+    float velocity_y;
+    float velocity_z;
+    
+} CannonBall;
+
+
 
 void move_cannonball(void);
-
 
 
 void fire_cannon(void);

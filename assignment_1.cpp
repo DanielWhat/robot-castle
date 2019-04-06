@@ -182,6 +182,13 @@ void initialize (void)
 
 
 
+void keyboard(unsigned char key, int x, int y)
+{
+    if (key == 'c') {
+        fire_cannon();
+    }
+}
+
 
 int main(int argc, char** argv)
 {

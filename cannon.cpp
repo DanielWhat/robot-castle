@@ -2,7 +2,10 @@
  * the cannon.*/
 
 #define GL_SILENCE_DEPRECATION 0
+//an offset to account for the fact that the cannonball may not begin at y = 0 when inside the cannon
+#define Y_OFFSET (sin(cannon_angle * (M_PI/180)) * 55 + cos(cannon_angle * (M_PI/180)) * 32)
 
+#include <math.h>
 #include <GL/freeglut.h>
 #include "open_off.h"
 #include "cannon.h"
@@ -12,35 +15,40 @@ static float white_c[4] = {1.0, 1.0, 1.0, 1.0};
 static float black_c[4] = {0.0, 0.0, 0.0, 1.0};
 
 /* For controlling the physics of the cannonball */
-static float x_velocity = 0;
-static float y_velocity = 0;
-static float z_velocity = 0;
 static float gravity = 1;
+static float friction = 1;
+static float cannon_power = 20;
+static int cannon_angle = 30; 
+static CannonBall cannon_ball = {.x = 0, .y = Y_OFFSET, .z = 0, .velocity_x = 0, .velocity_y = 0, .velocity_z = 0};
 
 
-void move_cannonball(void)
+void move_cannonball(int data)
 {
+    cannon_ball.x += (cannon_ball.x >= 0) ? cannon_ball.velocity_x : 0;
+    cannon_ball.y += (cannon_ball.y >= 0) ? cannon_ball.velocity_y : 0;
+    cannon_ball.velocity_y -= gravity;
     
-    y_velocity -= gravity;
-    
-}
-
-
-void fire_cannon(void)
-/* Sets the initial velocity of the cannonball and calls move_cannonball
- * to animate the cannonball's movement */
-{
-    x_velocity = 10;
-    y_velocity = 10;
-    
-    move_cannonball();
-}
-
-void keyboard(char key, int x, int y)
-{
-    if (key == 'c') {
-        fire_cannon();
+    //If the cannonball is on the ground
+    if (cannon_ball.y <= 0) {
+        
+        cannon_ball.y = 0;
+        //Cannon ball is now slowing down on the ground
+        cannon_ball.velocity_x = (cannon_ball.velocity_x > 0) ? cannon_ball.velocity_x - friction : 0; //But don't let velocity go negative
     }
+    
+    glutTimerFunc(50, move_cannonball, 0);
+    glutPostRedisplay();
+}
+
+
+void fire_cannon()
+/* Sets the initial velocity of the cannon_ball and calls move_cannon_ball
+ * to animate the cannon_ball's movement */
+{
+    cannon_ball.velocity_x = cos(cannon_angle * (M_PI / 180)) * cannon_power;
+    cannon_ball.velocity_y = sin(cannon_angle * (M_PI / 180)) * cannon_power;
+    
+    move_cannonball(0);
 }
 
 
@@ -49,14 +57,25 @@ void draw_cannon(const float x[], const float y[], const float z[], const int t1
  * x, y, z, t1, t2, t3 and the integer num_triangles. See open_off.h for
  * how to read an OFF file into this list form. */
 {
-    //Draw metal cannon
     glMaterialfv(GL_FRONT, GL_SPECULAR, white_c); //Enable specular lighting
+    //Draw metal cannon
     glPushMatrix();
         glColor3f(0.4, 0.5, 0.4);
-        glRotatef(30, 0, 0, 1);
+        glRotatef(cannon_angle, 0, 0, 1);
         glTranslatef(15, -30, 0);
         draw_off_file(x, y, z, t1, t2, t3, num_triangles);
     glPopMatrix();
+    
+    glMaterialf(GL_FRONT, GL_SHININESS, 60); //increasing shininess for cannonball (lowering the radius of specular reflection)
+    //Draw cannonball
+    glColor3f(0.45, 0.45, 0.45);
+    glPushMatrix();
+        glTranslatef(cannon_ball.x, cannon_ball.y - Y_OFFSET, cannon_ball.z);
+        glRotatef(cannon_angle, 0, 0, 1);
+        glTranslatef(55, 0, 0);
+        glutSolidSphere(5.0, 50, 50);
+    glPopMatrix();
+    glMaterialf(GL_FRONT, GL_SHININESS, 30); //reset shininess
     glMaterialfv(GL_FRONT, GL_SPECULAR, black_c); //disable specular lighting
     
     //Draw wooden brace @@@ <-- Texture this
