@@ -3,7 +3,9 @@
 
 #define GL_SILENCE_DEPRECATION 0
 //an offset to account for the fact that the cannonball may not begin at y = 0 when inside the cannon
-#define Y_OFFSET (sin(cannon_angle * (M_PI/180)) * 55 + cos(cannon_angle * (M_PI/180)) * 32)
+//To understand the formula remember that we want to rotate the ball as if it was at (55, 0) but then 
+//transpose it to (55, 28) so that it fits inside the cannon
+#define Y_OFFSET (sin(cannon_angle * (M_PI/180)) * 55 + cos(cannon_angle * (M_PI/180)) * 0 + 28)
 
 #include <math.h>
 #include <GL/freeglut.h>
