@@ -186,6 +186,16 @@ void keyboard(unsigned char key, int x, int y)
 {
     if (key == 'c') {
         fire_cannon();
+        
+    } else if (key == 'w') {
+        cannon_angle += 2;
+        update_cannonball_position();
+        glutPostRedisplay();
+        
+    } else if (key == 'a') {
+        cannon_angle -= 2;
+        update_cannonball_position();
+        glutPostRedisplay();
     }
 }
 

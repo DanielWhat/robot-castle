@@ -20,18 +20,23 @@ typedef struct cannon_ball_s
     
 } CannonBall;
 
+extern int cannon_angle;
 
 
+void update_cannonball_position(void);
+/* Updates the y position of the cannon ball when the cannon is rotated.
+ * Only works when the cannon ball is in the cannon */
+ 
+ 
+ 
 void move_cannonball(void);
+/* Updates the cannon ball's position and velocity when it is in motion */
+
 
 
 void fire_cannon(void);
 /* Sets the initial velocity of the cannonball and calls move_cannonball
  * to animate the cannonball's movement */
-
-
-
-void keyboard(unsigned char key, int x, int y);
 
 
 

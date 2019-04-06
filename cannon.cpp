@@ -9,6 +9,7 @@
 #include <GL/freeglut.h>
 #include "open_off.h"
 #include "cannon.h"
+#include <stdbool.h>
 
 //@@@ Need to find a fix for the white and black thing
 static float white_c[4] = {1.0, 1.0, 1.0, 1.0};
@@ -17,12 +18,26 @@ static float black_c[4] = {0.0, 0.0, 0.0, 1.0};
 /* For controlling the physics of the cannonball */
 static float gravity = 1;
 static float friction = 1;
+static bool is_cannon_fired = false;
+int cannon_angle = 20;
 static float cannon_power = 20;
-static int cannon_angle = 30; 
 static CannonBall cannon_ball = {.x = 0, .y = Y_OFFSET, .z = 0, .velocity_x = 0, .velocity_y = 0, .velocity_z = 0};
 
 
+void update_cannonball_position(void)
+/* Updates the y position of the cannon ball when the cannon is rotated.
+ * Only works when the cannon ball is in the cannon */
+ 
+{
+    if (!is_cannon_fired) {
+        cannon_ball.y = Y_OFFSET;
+    }
+}
+
+
+
 void move_cannonball(int data)
+/* Updates the cannon ball's position and velocity when it is in motion */
 {
     cannon_ball.x += (cannon_ball.x >= 0) ? cannon_ball.velocity_x : 0;
     cannon_ball.y += (cannon_ball.y >= 0) ? cannon_ball.velocity_y : 0;
@@ -36,9 +51,16 @@ void move_cannonball(int data)
         cannon_ball.velocity_x = (cannon_ball.velocity_x > 0) ? cannon_ball.velocity_x - friction : 0; //But don't let velocity go negative
     }
     
-    glutTimerFunc(50, move_cannonball, 0);
+    //The ball is not moving anymore
+    if (cannon_ball.velocity_y == 0 && cannon_ball.velocity_x == 0) {
+        //nothing
+        
+    } else {
+        glutTimerFunc(50, move_cannonball, 0);
+    }
     glutPostRedisplay();
 }
+
 
 
 void fire_cannon()
@@ -48,14 +70,18 @@ void fire_cannon()
     cannon_ball.velocity_x = cos(cannon_angle * (M_PI / 180)) * cannon_power;
     cannon_ball.velocity_y = sin(cannon_angle * (M_PI / 180)) * cannon_power;
     
+    is_cannon_fired = true;
+    
     move_cannonball(0);
 }
 
 
+
 void draw_cannon(const float x[], const float y[], const float z[], const int t1[], const int t2[], const int t3[], int num_triangles)
-/* Draws a cannon. The metal cannon barrel object should be in the lists
- * x, y, z, t1, t2, t3 and the integer num_triangles. See open_off.h for
- * how to read an OFF file into this list form. */
+/* Draws a cannon and cannon ball. The metal cannon barrel object should
+ * be in the lists x, y, z, t1, t2, t3 and the integer num_triangles. 
+ * See open_off.h for how to read an OFF file into this list form. This 
+ * function also handles some minor updating of the CannonBall object */
 {
     glMaterialfv(GL_FRONT, GL_SPECULAR, white_c); //Enable specular lighting
     //Draw metal cannon
