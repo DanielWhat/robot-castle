@@ -1,5 +1,5 @@
 /*
- * Functions given by Dr. Mukundan and refactored by myself.
+ * Functions given by Dr. R. Mukundan and refactored by myself.
  */
 
 #define GL_SILENCE_DEPRECATION

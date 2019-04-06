@@ -132,7 +132,7 @@ void draw_castle_walls(void)
 
 
 
-void draw_castle (const float x_castle[], const float y_castle[], const float z_castle[], const int t1_castle[], const int t2_castle[], const int t3_castle[], int num_triangles_castle) 
+void draw_castle(const float x_castle[], const float y_castle[], const float z_castle[], const int t1_castle[], const int t2_castle[], const int t3_castle[], int num_triangles_castle) 
 /* Draws the castle using glut objects and off_files.*/
 {
     /* *** ENTRANCE *** */
