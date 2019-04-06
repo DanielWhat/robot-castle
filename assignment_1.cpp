@@ -8,7 +8,6 @@
 #include "castle_rendering.h"
 #include "cannon.h"
 
-
 int angle = -90;
 int camera_x_offset = 0;
 int camera_z_offset = 0;
@@ -115,7 +114,7 @@ void display (void)
     dx = cos(angle * (M_PI/180));
     dz = sin(angle * (M_PI/180));
     
-    gluLookAt(camx, 3, camz, camx+dx, 3, camz+dz, 0.0, 1.0, 0.0);
+    gluLookAt(camx, 1, camz, camx+dx, 1, camz+dz, 0.0, 1.0, 0.0);
     
     //gluLookAt(7.5, 0, 30 + camera_z_offset, 7.5, 8, camera_z_offset, 0, 1, 0);
     
@@ -188,12 +187,12 @@ void keyboard(unsigned char key, int x, int y)
         fire_cannon();
         
     } else if (key == 'w') {
-        cannon_angle += 2;
+        cannon_angle += (cannon_angle < 86) ? 2 : 0;
         update_cannonball_position();
         glutPostRedisplay();
         
     } else if (key == 'a') {
-        cannon_angle -= 2;
+        cannon_angle -= (cannon_angle > -10) ? 2 : 0;
         update_cannonball_position();
         glutPostRedisplay();
     }
