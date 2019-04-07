@@ -2,7 +2,6 @@
 
 #include <GL/freeglut.h>
 #include "robot.h"
-#include "loadBMP.h"
 
 //@@@ Need to find a fix for the white and black thing
 static float white_r[4] = {1.0, 1.0, 1.0, 1.0};
@@ -99,7 +98,7 @@ void draw_robot_wheel(GLUquadricObj* p)
 
 
 
-void draw_robot(void)
+void draw_robot(Robot robot)
 {
     //Draw wheel
     GLUquadricObj* p = gluNewQuadric();
@@ -147,14 +146,14 @@ void draw_robot(void)
     
     //Robot eye right
     glPushMatrix();
-        glColor3f(0.5, 0, 0);
+        glColor3f(robot.right_eye.r, robot.right_eye.g, robot.right_eye.b);
         glTranslatef(0.4, 3.7, 0.8);
         glutSolidSphere(0.15, 15, 15);
     glPopMatrix();
     
     //Robot eye left
     glPushMatrix();
-        glColor3f(0, 0, 0.5);
+        glColor3f(robot.left_eye.r, robot.left_eye.g, robot.left_eye.b);
         glTranslatef(-0.4, 3.7, 0.8);
         glutSolidSphere(0.15, 15, 15);
     glPopMatrix();

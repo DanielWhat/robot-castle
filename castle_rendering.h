@@ -5,6 +5,11 @@
 #include <math.h>
 #include "open_off.h"
 
+void initialise_castle_textures(void);
+/* Initialise textures needed to properly display the castle */
+
+
+
 void draw_octagon(int x, int y, int z);
 /* Takes the normal vector to the octagon and draws an octagon at with 
  * centre at (0, 0, 0) and with each side having length 1 */
@@ -18,6 +23,11 @@ void draw_pillar (int height);
 
 void draw_castle_minor_pillars(void);
 /* Draws 4 minor pillars that surround the back of the castle */
+
+
+
+void draw_single_castle_wall(void);
+/* Draws one single castle wall with textures added. */
 
 
 

@@ -33,6 +33,8 @@ float *x_cannon, *y_cannon, *z_cannon;
 int *t1_cannon, *t2_cannon, *t3_cannon;
 int nvrt_cannon, ntri_cannon;
 
+Robot robot_1 = {.x = -10, .y = 0, .z = 10, .angle = 90, .left_eye = {.r = 1, .g = 0, .b = 0}, .right_eye = {.r = 0, .g = 0, .b = 1}};  
+
 
 void drawFloor()
 {
@@ -102,11 +104,42 @@ void draw_axis (void)
 }
 
 
+void animate_robot(int data)
+{
+    static int counter = 0;
+    
+    if (robot_1.x < 30 && robot_1.angle == 90) {
+        robot_1.x += 0.5;
+        
+    } else if (robot_1.x == 30 && robot_1.angle != -90) {
+        robot_1.angle -= 10;
+        
+    } else if (robot_1.x > -10 && robot_1.angle == -90) {
+        robot_1.x -= 0.5;
+        
+    } else if (robot_1.x == -10 && robot_1.angle != 90) {
+        robot_1.angle += 10;
+    }
+    
+    //Toggle eyes
+    if (counter / 5 == 1) {
+        robot_1.left_eye.r ^= 1;
+        robot_1.left_eye.b ^= 1; 
+        robot_1.right_eye.r ^= 1;
+        robot_1.right_eye.b ^= 1;  
+        counter = 0;
+    } 
+    counter++;
+    
+    glutTimerFunc(50, animate_robot, 0);
+    glutPostRedisplay();
+}
+
+
 
 void display (void)
 {
     float light_position[4] = {0, 10, 10, 1};
-    
     
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
@@ -115,14 +148,7 @@ void display (void)
     dx = cos(angle * (M_PI/180));
     dz = sin(angle * (M_PI/180));
     
-    gluLookAt(camx, 1, camz, camx+dx, 1, camz+dz, 0.0, 1.0, 0.0);
-    
-    //gluLookAt(7.5, 0, 30 + camera_z_offset, 7.5, 8, camera_z_offset, 0, 1, 0);
-    
-    //glTranslatef(0, 0, 0 + camera_z_offset * 2);
-    //glRotatef(angle, 0, 1, 0);
-    //glTranslatef(-7.5, -20, -(30+ camera_z_offset));
-    
+    gluLookAt(camx, 10, camz, camx+dx, 10, camz+dz, 0.0, 1.0, 0.0);
     
     glPushMatrix();
         draw_axis();
@@ -135,8 +161,6 @@ void display (void)
     glEnable(GL_LIGHTING);
     
     glPushMatrix();
-        glColor3f(0.0, 0.0, 1.0);
-        glTranslatef(20, 0, 0);
         draw_castle(x_castle, y_castle, z_castle, t1_castle, t2_castle, t3_castle, ntri_castle);
     glPopMatrix();
     
@@ -147,8 +171,12 @@ void display (void)
         draw_cannon(x_cannon, y_cannon, z_cannon, t1_cannon, t2_cannon, t3_cannon, ntri_cannon);
     glPopMatrix();
     
+    //Robot 1
     glPushMatrix();
-        draw_robot();
+        glTranslatef(robot_1.x, robot_1.y, robot_1.z);
+        glRotatef(robot_1.angle, 0, 1, 0);
+        glTranslatef(0, 1, 0); //Move up to origin
+        draw_robot(robot_1);
     glPopMatrix();
     
     glutSwapBuffers();
@@ -162,6 +190,8 @@ void initialize (void)
     
     load_mesh_file("./castle_gate.off", &x_castle, &y_castle, &z_castle, &t1_castle, &t2_castle, &t3_castle, &nvrt_castle, &ntri_castle);	
     load_mesh_file("./Cannon.off", &x_cannon, &y_cannon, &z_cannon, &t1_cannon, &t2_cannon, &t3_cannon, &nvrt_cannon, &ntri_cannon);
+    
+    initialise_castle_textures();
     
     glEnable(GL_LIGHTING); //Turn on lights
     glEnable(GL_LIGHT0);
@@ -216,6 +246,7 @@ int main(int argc, char** argv)
     glutDisplayFunc(display);
     glutSpecialFunc(special);
     glutKeyboardFunc(keyboard);
+    animate_robot(0);
     glutMainLoop();
     return 0;
 }

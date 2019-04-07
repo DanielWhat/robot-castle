@@ -13,8 +13,9 @@ using namespace std;
 
 void normal(int tindx, const float x[], const float y[], const float z[], const int t1[], const int t2[], const int t3[]);
 /* Calculates the normal vector given x, y, z vertex arrays and t1, t2, 
- * t3 index arrays. Calls glNormal3f() to put the normal vector into the
- * gl pipeline. */
+ * t3 index arrays. The normal vector is the normal vector defined by 
+ * the triangle formed by t1, t2, t3 at index tindx. Calls glNormal3f() 
+ * to put the normal vector into the gl pipeline. */
 
 
 

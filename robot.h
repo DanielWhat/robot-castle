@@ -2,7 +2,27 @@
 #define ROBOT_H
 
 #include <GL/freeglut.h>
-#include "loadBMP.h"
+
+typedef struct robot_eye_s
+{
+    int r;
+    int g;
+    int b;
+    
+} RobotEye;
+
+typedef struct robot_s
+{
+    float x;
+    float y;
+    float z;
+    float angle;
+    RobotEye left_eye;
+    RobotEye right_eye;
+    
+} Robot;
+
+
 
 void draw_robot_body(GLUquadricObj* p);
 /* Draws a robot body including the buttons on the front of the body. 
@@ -16,6 +36,6 @@ void draw_robot_wheel(GLUquadricObj* p);
 
 
 
-void draw_robot(void);
+void draw_robot(Robot robot);
 
 #endif /* ROBOT_H */

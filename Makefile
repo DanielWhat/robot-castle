@@ -9,19 +9,22 @@ all: assignment_1.out
 open_off.o: open_off.cpp open_off.h
 	$(CC) -c $(CFLAGS) $< -o $@
 	
-castle_rendering.o: castle_rendering.cpp castle_rendering.h open_off.h
+castle_rendering.o: castle_rendering.cpp castle_rendering.h open_off.h textures.h
 	$(CC) -c $(CFLAGS) $< -o $@
 	
 cannon.o: cannon.cpp cannon.h open_off.h
 	$(CC) -c $(CFLAGS) $< -o $@
-	
+		
 robot.o: robot.cpp robot.h
 	$(CC) -c $(CFLAGS) $< -o $@
-
-assignment_1.o: assignment_1.cpp open_off.h castle_rendering.h cannon.h
+	
+textures.o: textures.cpp textures.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
-assignment_1.out: assignment_1.o open_off.o castle_rendering.o cannon.o robot.o
+assignment_1.o: assignment_1.cpp open_off.h castle_rendering.h cannon.h robot.h
+	$(CC) -c $(CFLAGS) $< -o $@
+
+assignment_1.out: assignment_1.o open_off.o castle_rendering.o cannon.o robot.o textures.o
 	$(CC) $(CFLAGS) $^ -o $@ -lm $(FRAMEWORKS)
 	
 	
