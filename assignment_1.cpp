@@ -136,6 +136,17 @@ void animate_robot(int data)
 }
 
 
+void draw_spaceship(void)
+{
+    glColor3f(1.0, 1.0, 0);
+    glBegin(GL_LINES);
+        for (int x = -5; x < 6; x++) {
+            glVertex3f(x, 1, sqrt(5 - x * x));
+        }   
+    glEnd();
+}
+
+
 
 void display (void)
 {
@@ -161,6 +172,7 @@ void display (void)
     glEnable(GL_LIGHTING);
     
     glPushMatrix();
+        glTranslatef(20, 0, 0);
         draw_castle(x_castle, y_castle, z_castle, t1_castle, t2_castle, t3_castle, ntri_castle);
     glPopMatrix();
     
@@ -177,6 +189,10 @@ void display (void)
         glRotatef(robot_1.angle, 0, 1, 0);
         glTranslatef(0, 1, 0); //Move up to origin
         draw_robot(robot_1);
+    glPopMatrix();
+    
+    glPushMatrix();
+        draw_spaceship();
     glPopMatrix();
     
     glutSwapBuffers();
