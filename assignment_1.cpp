@@ -7,6 +7,7 @@
 #include "open_off.h"
 #include "castle_rendering.h"
 #include "cannon.h"
+#include "robot.h"
 
 int angle = -90;
 int camera_x_offset = 0;
@@ -144,6 +145,10 @@ void display (void)
         glTranslatef(10, 1, 10);
         glScalef(0.06, 0.06, 0.06);
         draw_cannon(x_cannon, y_cannon, z_cannon, t1_cannon, t2_cannon, t3_cannon, ntri_cannon);
+    glPopMatrix();
+    
+    glPushMatrix();
+        draw_robot();
     glPopMatrix();
     
     glutSwapBuffers();
