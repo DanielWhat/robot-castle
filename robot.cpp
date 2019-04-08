@@ -106,7 +106,7 @@ void draw_robot(Robot robot)
     //Draw body
     draw_robot_body(p);
     
-    glMaterialfv(GL_FRONT, GL_SPECULAR, white_r); //Enable specular light
+    glMaterialfv(GL_FRONT, GL_SPECULAR, white_r); //Enable specular light 
     
     //Robot head
     glPushMatrix();

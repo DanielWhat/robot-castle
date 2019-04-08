@@ -21,13 +21,16 @@ robot.o: robot.cpp robot.h
 textures.o: textures.cpp textures.h
 	$(CC) -c $(CFLAGS) $< -o $@
 	
-animations.o: animations.cpp animations.h robot.h
+animations.o: animations.cpp animations.h robot.h spaceship.h
+	$(CC) -c $(CFLAGS) $< -o $@
+	
+spaceship.o: spaceship.cpp spaceship.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
-assignment_1.o: assignment_1.cpp open_off.h castle_rendering.h cannon.h robot.h textures.h
+assignment_1.o: assignment_1.cpp open_off.h castle_rendering.h cannon.h robot.h spaceship.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
-assignment_1.out: assignment_1.o open_off.o castle_rendering.o cannon.o robot.o textures.o animations.o
+assignment_1.out: assignment_1.o open_off.o castle_rendering.o cannon.o robot.o textures.o animations.o spaceship.o
 	$(CC) $(CFLAGS) $^ -o $@ -lm $(FRAMEWORKS)
 	
 	

@@ -7,7 +7,18 @@
 
 #include <GL/freeglut.h>
 #include <math.h>
+#include <stdbool.h>
 #include "robot.h"
+#include "spaceship.h"
+
+
+void animate_spaceship_takeoff(Spaceship* spaceship, void (*callback) (int), int callback_data);
+
+
+
+void animate_passive_spaceship (Spaceship* spaceship, void (*callback) (int), int callback_data);
+/* Animates the spaceships passive/idle animation*/
+
 
 
 void animate_robot_wavy_hands(Robot* robot);

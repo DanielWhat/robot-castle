@@ -1,4 +1,4 @@
-/* A series of functions to animate Robot objects. 
+/* A series of functions to animate Robot objects and the spaceship. 
  * 
  * Note that these functions do not literally animate the robots. These 
  * functions change the information in the Robot* data according to the 
@@ -9,9 +9,43 @@
 
 #include <GL/freeglut.h>
 #include <math.h>
-//#include <stdbool.h>
+#include <stdbool.h>
 #include "robot.h"
 #include "animations.h"
+#include "spaceship.h"
+
+
+
+void animate_spaceship_takeoff(Spaceship* spaceship, void (*callback) (int), int callback_data)
+{
+    static float rotate_incr = 0.1;
+    static float height_incr = 0.1;
+    
+    spaceship->angle += rotate_incr;
+    spaceship->height += height_incr/10;
+    
+    rotate_incr += 0.2;
+    height_incr += (spaceship->height < 40) ? 0.1 : -height_incr/10;
+    
+    if (spaceship->height > 40 && spaceship->leg_height < 2) {
+        
+        //bring in the legs for takeoff
+        spaceship->leg_height += 0.05;
+    }
+    
+    glutTimerFunc(50, callback, callback_data);
+    glutPostRedisplay();
+}
+
+
+void animate_passive_spaceship (Spaceship* spaceship, void (*callback) (int), int callback_data)
+/* Animates the spaceships passive/idle animation*/
+{
+    spaceship->is_lights_on = (spaceship->is_lights_on) ? false : true;
+    
+    glutTimerFunc(500, callback, callback_data);
+    glutPostRedisplay();
+}
 
 
 void animate_robot_wavy_hands(Robot* robot)
