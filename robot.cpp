@@ -7,9 +7,6 @@
 static float white_r[4] = {1.0, 1.0, 1.0, 1.0};
 static float black_r[4] = {0.0, 0.0, 0.0, 1.0};
 
-static float angle_robot = 80;
-
-
 void draw_robot_body(GLUquadricObj* p)
 /* Draws a robot body including the buttons on the front of the body. 
  * Takes a GLUquadraticObj pointer for drawing quadratics. */
@@ -99,6 +96,8 @@ void draw_robot_wheel(GLUquadricObj* p)
 
 
 void draw_robot(Robot robot)
+/* Takes a robot object in order to properly draw the robots features 
+ * and limb orientations. */
 {
     //Draw wheel
     GLUquadricObj* p = gluNewQuadric();
@@ -120,7 +119,8 @@ void draw_robot(Robot robot)
     glPushMatrix();
         glColor3f(0.6, 0.6, 0.6);
         glTranslatef(-0.9, 2.5, 0);
-        glRotatef(-angle_robot, 0, 0, 1);
+        glRotatef(robot.left_arm.humerus_side_angle, 0, 0, 1);
+        glRotatef(robot.left_arm.humerus_forward_angle, 1, 0, 0);
         glRotatef(90, 1, 0, 0);
         glutSolidSphere(0.15, 15, 15);
         glPushMatrix();
@@ -134,7 +134,8 @@ void draw_robot(Robot robot)
     glPushMatrix();
         glColor3f(0.6, 0.6, 0.6);
         glTranslatef(0.9, 2.5, 0);
-        glRotatef(angle_robot, 0, 0, 1);
+        glRotatef(robot.right_arm.humerus_side_angle, 0, 0, 1);
+        glRotatef(robot.right_arm.humerus_forward_angle, 1, 0, 0);
         glRotatef(90, 1, 0, 0);
         glutSolidSphere(0.15, 15, 15);
         glPushMatrix();

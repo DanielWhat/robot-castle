@@ -8,6 +8,12 @@
 #include "castle_rendering.h"
 #include "cannon.h"
 #include "robot.h"
+#include "textures.h"
+#include "animations.h"
+
+//For debugging
+#include <iostream>
+#include <fstream>
 
 int angle = -90;
 int camera_x_offset = 0;
@@ -33,22 +39,34 @@ float *x_cannon, *y_cannon, *z_cannon;
 int *t1_cannon, *t2_cannon, *t3_cannon;
 int nvrt_cannon, ntri_cannon;
 
-Robot robot_1 = {.x = -10, .y = 0, .z = 10, .angle = 90, .left_eye = {.r = 1, .g = 0, .b = 0}, .right_eye = {.r = 0, .g = 0, .b = 1}};  
+GLuint spaceship_texture;
+
+Robot robot_1 = {.x = -10, .y = 0, .z = 10, .angle_y = 90, .angle_z = 0, .left_arm = {.humerus_side_angle = 0, .humerus_forward_angle = 0}, .right_arm = {.humerus_side_angle = 0, .humerus_forward_angle = 0},.left_eye = {.r = 1, .g = 0, .b = 0}, .right_eye = {.r = 0, .g = 0, .b = 1}};  
 
 
-void drawFloor()
+void draw_floor(void)
 {
-    glColor3f(0., 0.5,  0.);            //Floor colour
+	//float white[4] = {1., 1., 1., 1.};
+	float black[4] = {0};
+	glColor4f(0.0, 0.7, 0.0, 1.0);  //The floor is green in colour
+	glNormal3f(0.0, 1.0, 0.0);
+    
+    glMaterialfv(GL_FRONT, GL_SPECULAR, black);
 
-    for(int i = -50; i <= 50; i ++)
-    {
-        glBegin(GL_LINES);          //A set of grid lines on the xz-plane
-            glVertex3f(-50, -0.75, i);
-            glVertex3f(50, -0.75, i);
-            glVertex3f(i, -0.75, -50);
-            glVertex3f(i, -0.75, 50);
-        glEnd();
-    }
+	//The floor is made up of several tiny squares on a 200x200 grid. Each square has a unit size.
+	glBegin(GL_QUADS);
+	for(int i = -200; i < 200; i++)
+	{
+		for(int j = -200;  j < 200; j++)
+		{
+			glVertex3f(i, 0, j);
+			glVertex3f(i, 0, j+1);
+			glVertex3f(i+1, 0, j+1);
+			glVertex3f(i+1, 0, j);
+		}
+	}
+	glEnd();
+    //glMaterialfv(GL_FRONT, GL_SPECULAR, white);
 }
 
 
@@ -104,48 +122,80 @@ void draw_axis (void)
 }
 
 
-void animate_robot(int data)
+void animate_robots(int selector)
 {
-    static int counter = 0;
-    
-    if (robot_1.x < 30 && robot_1.angle == 90) {
-        robot_1.x += 0.5;
+    if (selector == 0) {
         
-    } else if (robot_1.x == 30 && robot_1.angle != -90) {
-        robot_1.angle -= 10;
-        
-    } else if (robot_1.x > -10 && robot_1.angle == -90) {
-        robot_1.x -= 0.5;
-        
-    } else if (robot_1.x == -10 && robot_1.angle != 90) {
-        robot_1.angle += 10;
+        animate_patrol_robot(&robot_1, animate_robots);
     }
-    
-    //Toggle eyes
-    if (counter / 5 == 1) {
-        robot_1.left_eye.r ^= 1;
-        robot_1.left_eye.b ^= 1; 
-        robot_1.right_eye.r ^= 1;
-        robot_1.right_eye.b ^= 1;  
-        counter = 0;
-    } 
-    counter++;
-    
-    glutTimerFunc(50, animate_robot, 0);
-    glutPostRedisplay();
 }
+
+
+
+void normalm(float x1, float y1, float z1,
+            float x2, float y2, float z2,
+            float x3, float y3, float z3 )
+{
+    float nx, ny, nz;
+    nx = y1*(z2-z3)+ y2*(z3-z1)+ y3*(z1-z2);
+    ny = z1*(x2-x3)+ z2*(x3-x1)+ z3*(x1-x2);
+    nz = x1*(y2-y3)+ x2*(y3-y1)+ x3*(y1-y2);
+    glNormal3f(nx, ny, nz);
+}
+
 
 
 void draw_spaceship(void)
 {
-    glColor3f(1.0, 1.0, 0);
-    glBegin(GL_LINES);
-        for (int x = -5; x < 6; x++) {
-            glVertex3f(x, 1, sqrt(5 - x * x));
-        }   
-    glEnd();
+    float x[19] = {0, 2, 3.1, 4, 4.6, 4.75, 5, 5.7, 7, 10, 11.2, 11.8, 12, 11.8, 11.5, 11, 10, 7, 0};
+    float y[19] = {10, 9.85, 9.6, 9, 7.6, 6, 5.6, 5.3, 5.1, 4.8, 4.6, 4.3, 4, 3.4, 3, 2.7, 2.4, 2.3, 2.1};
+    float z[19] = {0};
+    float new_x[19], new_y[19], new_z[19];
+    
+    float y_tex_cord[19] = {0, 0.07183167024826759, 0.11223310925819929, 0.15097322102694813, 0.20552537848006547, 0.26308104711811175, 0.2799750648682411, 0.30725114359479977, 0.3543587448246648, 0.4623403751161782, 0.505911502392443, 0.5299370997984082, 0.5428504703879912, 0.5655020208517456, 0.5834096438516726, 0.6042933415043925, 0.6416855560974432, 0.7491909696017439, 1.0};
+    
+    
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, spaceship_texture);
+    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+    
+    for (int j = 0; j < 365; j+=5) {
+        for (int i = 0; i < 19; i++) {
+            new_x[i] = cos(5 * (M_PI/180)) * x[i] + sin(5 * (M_PI/180)) * z[i];
+            new_y[i] = y[i];
+            new_z[i] = -sin(5 * (M_PI/180)) * x[i] + cos(5 * (M_PI/180)) * z[i];
+        }
+        
+        glColor3f(0, 1.0, 0);
+        glBegin(GL_TRIANGLE_STRIP);
+            for (int i = 0; i < 19; i++) {
+                if (i > 0) {
+                    normalm(new_x[i-1], new_y[i-1], new_z[i-1],
+                            x[i-1], y[i-1], z[i-1],
+                            x[i], y[i], z[i]);
+                }
+                
+                glTexCoord2f(1, y_tex_cord[i]);
+                glVertex3f(x[i], y[i], z[i]);
+                
+                if (i > 0) {
+                    normalm(new_x[i-1], new_y[i-1], new_z[i-1],
+                            x[i], y[i], z[i],
+                            new_x[i], new_y[i], new_z[i]);
+                }
+                glTexCoord2f(0, y_tex_cord[i]);
+                glVertex3f(new_x[i], new_y[i], new_z[i]);
+            }
+        glEnd();
+        
+        for (int i = 0; i < 19; i++) {
+            x[i] = new_x[i];
+            y[i] = new_y[i];
+            z[i] = new_z[i];
+        }
+    }
+    glDisable(GL_TEXTURE_2D);
 }
-
 
 
 void display (void)
@@ -168,11 +218,16 @@ void display (void)
     glLightfv(GL_LIGHT0, GL_POSITION, light_position);
     
     glDisable(GL_LIGHTING);
-    drawFloor();
+    
+    glPushMatrix();
+        glTranslatef(0, -1, 0);
+        draw_floor();
+    glPopMatrix();
     glEnable(GL_LIGHTING);
     
     glPushMatrix();
         glTranslatef(20, 0, 0);
+        glScalef(2, 2, 2);
         draw_castle(x_castle, y_castle, z_castle, t1_castle, t2_castle, t3_castle, ntri_castle);
     glPopMatrix();
     
@@ -186,12 +241,22 @@ void display (void)
     //Robot 1
     glPushMatrix();
         glTranslatef(robot_1.x, robot_1.y, robot_1.z);
-        glRotatef(robot_1.angle, 0, 1, 0);
+        glRotatef(robot_1.angle_y, 0, 1, 0);
+        glRotatef(robot_1.angle_z, 0, 0, 1);
         glTranslatef(0, 1, 0); //Move up to origin
         draw_robot(robot_1);
     glPopMatrix();
     
+    /*glPushMatrix();
+        glTranslatef(-4, -0.5, 0);
+        glRotatef(29, 0, 1, 0);
+        glRotatef(-90, 1, 0, 0);
+        glScalef(0.3, 0.3, 0.3);
+        draw_paraboloid(25);
+    glPopMatrix();*/
+    
     glPushMatrix();
+        glTranslatef(-30, 0, 0);
         draw_spaceship();
     glPopMatrix();
     
@@ -208,6 +273,7 @@ void initialize (void)
     load_mesh_file("./Cannon.off", &x_cannon, &y_cannon, &z_cannon, &t1_cannon, &t2_cannon, &t3_cannon, &nvrt_cannon, &ntri_cannon);
     
     initialise_castle_textures();
+    initialise_textures(&spaceship_texture, "13777.bmp");
     
     glEnable(GL_LIGHTING); //Turn on lights
     glEnable(GL_LIGHT0);
@@ -250,6 +316,7 @@ void keyboard(unsigned char key, int x, int y)
 }
 
 
+
 int main(int argc, char** argv)
 {
     glutInit(&argc, argv);
@@ -262,7 +329,7 @@ int main(int argc, char** argv)
     glutDisplayFunc(display);
     glutSpecialFunc(special);
     glutKeyboardFunc(keyboard);
-    animate_robot(0);
+    animate_robots(0);
     glutMainLoop();
     return 0;
 }

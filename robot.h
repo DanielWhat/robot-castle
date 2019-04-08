@@ -11,12 +11,24 @@ typedef struct robot_eye_s
     
 } RobotEye;
 
+
+typedef struct robot_arm_s
+{
+    float humerus_side_angle;
+    float humerus_forward_angle; 
+    
+} RobotArm;
+
+
 typedef struct robot_s
 {
     float x;
     float y;
     float z;
-    float angle;
+    float angle_y;
+    float angle_z;
+    RobotArm left_arm;
+    RobotArm right_arm;
     RobotEye left_eye;
     RobotEye right_eye;
     
@@ -37,5 +49,8 @@ void draw_robot_wheel(GLUquadricObj* p);
 
 
 void draw_robot(Robot robot);
+/* Takes a robot object in order to properly draw the robots features 
+ * and limb orientations. */
+ 
 
 #endif /* ROBOT_H */
