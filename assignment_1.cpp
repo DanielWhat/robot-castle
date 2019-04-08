@@ -53,11 +53,11 @@ void draw_floor(void)
     
     glMaterialfv(GL_FRONT, GL_SPECULAR, black);
 
-	//The floor is made up of several tiny squares on a 200x200 grid. Each square has a unit size.
+	//The floor is made up of several tiny squares on a 200x200 grid. Each square has a unit size. //@@ change to 1600 for production
 	glBegin(GL_QUADS);
-	for(int i = -200; i < 200; i++)
+	for(int i = -400; i < 400; i++)
 	{
-		for(int j = -200;  j < 200; j++)
+		for(int j = -400;  j < 400; j++)
 		{
 			glVertex3f(i, 0, j);
 			glVertex3f(i, 0, j+1);
@@ -200,7 +200,9 @@ void draw_spaceship(void)
 
 void display (void)
 {
-    float light_position[4] = {0, 10, 10, 1};
+    float light_position[4] = {0, 20, 10, 1};
+    float spotlight_position[4] = {0, 7, -10, 1};
+    float spotlight_direction[4] = {0, -1, 3, 0};
     
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
@@ -211,19 +213,27 @@ void display (void)
     
     gluLookAt(camx, 10, camz, camx+dx, 10, camz+dz, 0.0, 1.0, 0.0);
     
+    glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+    
+    //Robot 1
+    glPushMatrix();
+        glTranslatef(robot_1.x, robot_1.y, robot_1.z);
+        glRotatef(robot_1.angle_y, 0, 1, 0);
+        glRotatef(robot_1.angle_z, 0, 0, 1);
+        glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, spotlight_direction);
+        glLightfv(GL_LIGHT1, GL_POSITION, spotlight_position);
+        glTranslatef(0, 1, 0); //Move up to origin
+        draw_robot(robot_1);
+    glPopMatrix();
+    
     glPushMatrix();
         draw_axis();
     glPopMatrix();
     
-    glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+    //glDisable(GL_LIGHTING);
     
-    glDisable(GL_LIGHTING);
     
-    glPushMatrix();
-        glTranslatef(0, -1, 0);
-        draw_floor();
-    glPopMatrix();
-    glEnable(GL_LIGHTING);
+    //glEnable(GL_LIGHTING);
     
     glPushMatrix();
         glTranslatef(20, 0, 0);
@@ -238,15 +248,6 @@ void display (void)
         draw_cannon(x_cannon, y_cannon, z_cannon, t1_cannon, t2_cannon, t3_cannon, ntri_cannon);
     glPopMatrix();
     
-    //Robot 1
-    glPushMatrix();
-        glTranslatef(robot_1.x, robot_1.y, robot_1.z);
-        glRotatef(robot_1.angle_y, 0, 1, 0);
-        glRotatef(robot_1.angle_z, 0, 0, 1);
-        glTranslatef(0, 1, 0); //Move up to origin
-        draw_robot(robot_1);
-    glPopMatrix();
-    
     /*glPushMatrix();
         glTranslatef(-4, -0.5, 0);
         glRotatef(29, 0, 1, 0);
@@ -256,8 +257,15 @@ void display (void)
     glPopMatrix();*/
     
     glPushMatrix();
-        glTranslatef(-30, 0, 0);
+        glTranslatef(30, 0, 0);
         draw_spaceship();
+    glPopMatrix();
+    
+    //Make sure floor is drawn before any lighting
+    glPushMatrix();
+        glScalef(0.5, 1, 0.5);  //@@ change to 0.125 for production
+        glTranslatef(0, -1, 0);
+        draw_floor();
     glPopMatrix();
     
     glutSwapBuffers();
@@ -277,10 +285,19 @@ void initialize (void)
     
     glEnable(GL_LIGHTING); //Turn on lights
     glEnable(GL_LIGHT0);
+    glEnable(GL_LIGHT1); //this will be a spotlight
     
     glLightfv(GL_LIGHT0, GL_AMBIENT, grey); //the passive light coming from all directions is a light grey
     glLightfv(GL_LIGHT0, GL_DIFFUSE, white); //white light
     glLightfv(GL_LIGHT0, GL_SPECULAR, white); //white light
+    
+    glLightfv(GL_LIGHT1, GL_AMBIENT, grey);
+    glLightfv(GL_LIGHT1, GL_DIFFUSE, white); 
+    glLightfv(GL_LIGHT1, GL_SPECULAR, white); 
+    
+    //convert to spotlight
+    glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 15); //this determines size of the spotlight
+    glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 100.0); //this determines essentially the luminocity of the spotlight
     
     glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE); //Let ambient and diffuse colours track the current colour
     glEnable(GL_COLOR_MATERIAL); //Enable the above setting
