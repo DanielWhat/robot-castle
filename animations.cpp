@@ -14,7 +14,8 @@
 #include "animations.h"
 #include "spaceship.h"
 
-
+#include <iostream>
+#include <fstream>
 
 void animate_spaceship_takeoff(Spaceship* spaceship, void (*callback) (int), int callback_data)
 {
@@ -33,18 +34,18 @@ void animate_spaceship_takeoff(Spaceship* spaceship, void (*callback) (int), int
         spaceship->leg_height += 0.05;
     }
     
-    glutTimerFunc(50, callback, callback_data);
     glutPostRedisplay();
+    glutTimerFunc(100, callback, callback_data);
 }
 
 
 void animate_passive_spaceship (Spaceship* spaceship, void (*callback) (int), int callback_data)
 /* Animates the spaceships passive/idle animation*/
 {
-    spaceship->is_lights_on = (spaceship->is_lights_on) ? false : true;
+    spaceship->is_lights_on = !spaceship->is_lights_on;
     
-    glutTimerFunc(500, callback, callback_data);
     glutPostRedisplay();
+    glutTimerFunc(500, callback, callback_data);
 }
 
 
@@ -73,6 +74,61 @@ void toggle_eyes (Robot* robot)
     robot->left_eye.b ^= 1; 
     robot->right_eye.r ^= 1;
     robot->right_eye.b ^= 1;  
+}
+
+
+
+void animate_worker_robot(Robot* robot, void (*callback) (int), int callback_data)
+{
+    static int counter = 0;
+    
+    if (robot->z > -55 && robot->angle_y == 180) {
+        robot->z -= 0.5;
+        
+    } else if (robot->z <= -55 && robot->angle_y > 90) {
+        robot->x += sin(robot->angle_y * (M_PI/180))/2;
+        robot->z += cos(robot->angle_y * (M_PI/180))/2;
+        robot->angle_y -= 5;
+        
+    } else if (robot->x < 75 && robot->angle_y == 90) {
+        robot->x += 0.5;
+        
+    } else if (robot->x >= 75 && robot->angle_y > 0) {
+        robot->x += sin(robot->angle_y * (M_PI/180))/2;
+        robot->z += cos(robot->angle_y * (M_PI/180))/2;
+        robot->angle_y -= 5;
+        
+    } else if (robot->z < 30 && robot->angle_y == 0) {
+        robot->z += 0.5;
+        
+    } else if (robot->z >= 30 && robot->angle_y > -90) {
+        robot->x += sin(robot->angle_y * (M_PI/180))/2;
+        robot->z += cos(robot->angle_y * (M_PI/180))/2;
+        robot->angle_y -= 5;
+        
+    } else if (robot->x > -10 && robot->angle_y == -90) {
+        robot->x -= 0.5;
+        
+    } else if (robot->x <= -10 && robot->angle_y > -180) {
+        robot->x += sin(robot->angle_y * (M_PI/180))/2;
+        robot->z += cos(robot->angle_y * (M_PI/180))/2;
+        robot->angle_y -= 5;
+        
+        //reset angle
+        if (robot->angle_y == -180) {
+            robot->angle_y = 180;
+            
+        }
+    } 
+    
+    if (counter / 3 == 1) {
+        toggle_eyes(robot);
+        counter = 0;
+    }
+    counter++;
+    
+    glutPostRedisplay();
+    glutTimerFunc(100, callback, callback_data);
 }
 
 
@@ -136,6 +192,6 @@ void animate_patrol_robot(Robot* robot, void (*callback) (int))
     }
     counter++;
     
-    glutTimerFunc(50, callback, 0);
     glutPostRedisplay();
+    glutTimerFunc(100, callback, 0);
 }

@@ -42,7 +42,9 @@ float *x_cannon, *y_cannon, *z_cannon;
 int *t1_cannon, *t2_cannon, *t3_cannon;
 int nvrt_cannon, ntri_cannon;
 
-Robot robot_1 = {.x = -10, .y = 0, .z = 10, .angle_y = 90, .angle_z = 0, .left_arm = {.humerus_side_angle = 0, .humerus_forward_angle = 0}, .right_arm = {.humerus_side_angle = 0, .humerus_forward_angle = 0},.left_eye = {.r = 1, .g = 0, .b = 0}, .right_eye = {.r = 0, .g = 0, .b = 1}};  
+Robot robot_1 = {.x = -10, .y = 0, .z = 10, .angle_y = 90, .angle_z = 0, .angle_x = 0, .left_arm = {.humerus_side_angle = 0, .humerus_forward_angle = 0}, .right_arm = {.humerus_side_angle = 0, .humerus_forward_angle = 0},.left_eye = {.r = 1, .g = 0, .b = 0}, .right_eye = {.r = 0, .g = 0, .b = 1}};  
+Robot robot_2 = {.x = -10, .y = 0, .z = 30, .angle_y = 180, .angle_z = 0, .angle_x = 15, .left_arm = {.humerus_side_angle = 0, .humerus_forward_angle = -95}, .right_arm = {.humerus_side_angle = 0, .humerus_forward_angle = -95},.left_eye = {.r = 1, .g = 0, .b = 0}, .right_eye = {.r = 0, .g = 0, .b = 1}};  
+
 
 Spaceship spaceship = {.angle = 0, .height = 0, .leg_height = 0, .is_lights_on = true};
 
@@ -127,16 +129,17 @@ void draw_axis (void)
 void animation_selector(int selector)
 {
     if (selector == 0) {
-        
         animate_patrol_robot(&robot_1, animation_selector);
         
     } else if (selector == 1) {
-        
         animate_spaceship_takeoff(&spaceship, animation_selector, 1);
         
     } else if (selector == 2) {
-        
         animate_passive_spaceship(&spaceship, animation_selector, 2);
+        
+    } else if (selector == 3) {
+        animate_worker_robot(&robot_2, animation_selector, 3);
+        
     }
 }
 
@@ -160,7 +163,7 @@ void display (void)
     glLightfv(GL_LIGHT0, GL_POSITION, light_position);
     
     
-    //Robot 1
+    //Patrol Robot
     glPushMatrix();
         glTranslatef(robot_1.x, robot_1.y, robot_1.z);
         glRotatef(robot_1.angle_y, 0, 1, 0);
@@ -170,6 +173,24 @@ void display (void)
         glTranslatef(0, 1, 0); //Move up to origin
         draw_robot(robot_1);
     glPopMatrix();
+    
+    
+    //Worker Robot
+    glPushMatrix();
+        glTranslatef(robot_2.x, robot_2.y, robot_2.z);
+        glRotatef(robot_2.angle_y, 0, 1, 0);
+        glPushMatrix();
+            glColor3f(0, 0, 1.0);
+            glTranslatef(0, 0, 3);
+            glTranslatef(0, 2, 0); //Move up to origin
+            glScalef(1, 2, 1);
+            glutSolidCube(2.0);
+        glPopMatrix();
+        glRotatef(robot_2.angle_x, 1, 0, 0);
+        glTranslatef(0, 1, 0); //Move up to origin
+        draw_robot(robot_2);
+    glPopMatrix();
+    
     
     glPushMatrix();
         glTranslatef(37, 0, -30);
@@ -213,6 +234,8 @@ void display (void)
     
     glutSwapBuffers();
 }
+
+
 
 
 
@@ -295,6 +318,7 @@ int main(int argc, char** argv)
     glutKeyboardFunc(keyboard);
     animation_selector(0);
     animation_selector(2);
+    animation_selector(3);
     glutMainLoop();
     return 0;
 }

@@ -27,6 +27,7 @@ typedef struct robot_s
     float z;
     float angle_y;
     float angle_z;
+    float angle_x;
     RobotArm left_arm;
     RobotArm right_arm;
     RobotEye left_eye;

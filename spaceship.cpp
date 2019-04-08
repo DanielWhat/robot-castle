@@ -6,9 +6,6 @@
 #include "spaceship.h"
 #include "textures.h"
 
-#include <iostream>
-#include <fstream>
-
 
 static GLuint spaceship_texture;
 
@@ -44,8 +41,8 @@ void initialise_spaceship(int light)
     glLightfv(GL_LIGHT2, GL_DIFFUSE, white); 
     glLightfv(GL_LIGHT2, GL_SPECULAR, white); 
        
-    glLightf(GL_LIGHT2, GL_SPOT_CUTOFF, 50); //this determines size of the spotlight
-    glLightf(GL_LIGHT2, GL_SPOT_EXPONENT, 10.0); //this determines essentially the luminocity of the spotlight
+    glLightf(GL_LIGHT2, GL_SPOT_CUTOFF, 70); //this determines size of the spotlight
+    glLightf(GL_LIGHT2, GL_SPOT_EXPONENT, 1.0); //this determines essentially the luminocity of the spotlight
 }
 
 

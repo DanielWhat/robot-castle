@@ -31,6 +31,10 @@ void toggle_eyes (Robot* robot);
 
 
 
+void animate_worker_robot(Robot* robot, void (*callback) (int), int callback_data);
+/*@@*/
+
+
 void animate_patrol_robot(Robot* robot, void (*callback) (int));
 /* Animates the patrol robot when given a Robot* data type. A callback 
  * function is needed asw ell which will call this function when given 
