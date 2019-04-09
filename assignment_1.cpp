@@ -11,6 +11,9 @@
 #include "robot.h"
 #include "animations.h"
 #include "spaceship.h"
+#include "textures.h"
+
+//#include "loadBMP.h"
 
 //For debugging @@
 #include <iostream>
@@ -37,31 +40,35 @@ float *x_castle, *y_castle, *z_castle;  //vertex coordinate arrays
 int *t1_castle, *t2_castle, *t3_castle; //triangles
 int nvrt_castle, ntri_castle;    //total number of vertices and triangles
 
+//for camera toggle
+bool is_default_cam = true;
+
 //Cannon Variables
 float *x_cannon, *y_cannon, *z_cannon;
 int *t1_cannon, *t2_cannon, *t3_cannon;
 int nvrt_cannon, ntri_cannon;
 
+//Objects
 Robot robot_1 = {.x = -10, .y = 0, .z = 10, .angle_y = 90, .angle_z = 0, .angle_x = 0, .left_arm = {.humerus_side_angle = 0, .humerus_forward_angle = 0}, .right_arm = {.humerus_side_angle = 0, .humerus_forward_angle = 0},.left_eye = {.r = 1, .g = 0, .b = 0}, .right_eye = {.r = 0, .g = 0, .b = 1}};  
 Robot robot_2 = {.x = -10, .y = 0, .z = 30, .angle_y = 180, .angle_z = 0, .angle_x = 15, .left_arm = {.humerus_side_angle = 0, .humerus_forward_angle = -95}, .right_arm = {.humerus_side_angle = 0, .humerus_forward_angle = -95},.left_eye = {.r = 1, .g = 0, .b = 0}, .right_eye = {.r = 0, .g = 0, .b = 1}};  
 
-
 Spaceship spaceship = {.angle = 0, .height = 0, .leg_height = 0, .is_lights_on = true};
+
+GLuint skybox_texture_ids[6];
 
 void draw_floor(void)
 {
 	//float white[4] = {1., 1., 1., 1.};
 	float black[4] = {0};
-	glColor4f(0.0, 0.7, 0.0, 1.0);  //The floor is green in colour
 	glNormal3f(0.0, 1.0, 0.0);
     
     glMaterialfv(GL_FRONT, GL_SPECULAR, black);
 
 	//The floor is made up of several tiny squares on a 200x200 grid. Each square has a unit size. //@@ change to 1600 for production
 	glBegin(GL_QUADS);
-	for(int i = -400; i < 400; i++)
+	for(int i = -800; i < 800; i++)
 	{
-		for(int j = -400;  j < 400; j++)
+		for(int j = -800;  j < 800; j++)
 		{
 			glVertex3f(i, 0, j);
 			glVertex3f(i, 0, j+1);
@@ -71,6 +78,75 @@ void draw_floor(void)
 	}
 	glEnd();
     //glMaterialfv(GL_FRONT, GL_SPECULAR, white);
+}
+
+
+void draw_skybox(void)
+{
+    glDisable(GL_LIGHTING);
+    glEnable(GL_TEXTURE_2D);
+    glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
+    
+    //front
+    glBindTexture(GL_TEXTURE_2D, skybox_texture_ids[0]);
+    glColor3f(1.0, 0.0, 0.0);
+    glBegin(GL_QUADS);
+        glTexCoord2f(0, 0); glVertex3f(-250, -10, -250);
+        glTexCoord2f(1, 0); glVertex3f(250, -10, -250);
+        glTexCoord2f(1, 1); glVertex3f(250, 240, -250);
+        glTexCoord2f(0, 1); glVertex3f(-250, 240, -250);
+    glEnd();
+    
+    //right
+    glBindTexture(GL_TEXTURE_2D, skybox_texture_ids[1]);
+    glBegin(GL_QUADS);
+        glTexCoord2f(0, 0); glVertex3f(250, -10, -250);
+        glTexCoord2f(1, 0); glVertex3f(250, -10, 250);
+        glTexCoord2f(1, 1); glVertex3f(250, 240, 250);
+        glTexCoord2f(0, 1); glVertex3f(250, 240, -250);
+    glEnd();
+    
+    //left
+    glBindTexture(GL_TEXTURE_2D, skybox_texture_ids[2]);
+    glBegin(GL_QUADS);
+        glTexCoord2f(1, 0); glVertex3f(-250, -10, -250);
+        glTexCoord2f(0, 0); glVertex3f(-250, -10, 250);
+        glTexCoord2f(0, 1); glVertex3f(-250, 240, 250);
+        glTexCoord2f(1, 1); glVertex3f(-250, 240, -250);
+    glEnd();
+    
+    //top
+    glBindTexture(GL_TEXTURE_2D, skybox_texture_ids[3]);
+    glBegin(GL_QUADS);
+        glTexCoord2f(0, 0); glVertex3f(-250, 240, -250);
+        glTexCoord2f(1, 0); glVertex3f(250, 240, -250);
+        glTexCoord2f(1, 1); glVertex3f(250, 240, 250);
+        glTexCoord2f(0, 1); glVertex3f(-250, 240, 250);
+    glEnd();
+    
+    //back
+    glBindTexture(GL_TEXTURE_2D, skybox_texture_ids[4]);
+    glBegin(GL_QUADS);
+        glColor3f(0, 1, 0);
+        glTexCoord2f(1, 0); glVertex3f(-250, -10, 250);
+        glTexCoord2f(0, 0); glVertex3f(250, -10, 250);
+        glTexCoord2f(0, 1); glVertex3f(250, 240, 250);
+        glTexCoord2f(1, 1); glVertex3f(-250, 240, 250);
+    glEnd();
+    
+    
+    //floor
+    /*glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
+    glBindTexture(GL_TEXTURE_2D, skybox_texture_ids[5]);
+    glBegin(GL_QUADS);
+        glTexCoord2f(0, 0); glVertex3f(-250, -10, -250);
+        glTexCoord2f(1, 0); glVertex3f(250, -10, -250);
+        glTexCoord2f(1, 1); glVertex3f(250, -10, 250);
+        glTexCoord2f(0, 1); glVertex3f(-250, -10, 250);
+    glEnd();*/
+    
+    glDisable(GL_TEXTURE_2D);
+    glEnable(GL_LIGHTING);
 }
 
 
@@ -150,6 +226,10 @@ void display (void)
     float light_position[4] = {0, 20, 10, 1};
     float spotlight_position[4] = {0, 7, -10, 1};
     float spotlight_direction[4] = {0, -1, 3, 0};
+    float shadow_transformation[16] = {light_position[1], 0, 0, 0,
+                                        -light_position[0], 0, light_position[2], -1,
+                                        0, 0, light_position[1], 0,
+                                        0, 0, 0, light_position[1]};
     
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
@@ -158,10 +238,15 @@ void display (void)
     dx = cos(angle * (M_PI/180));
     dz = sin(angle * (M_PI/180));
     
-    gluLookAt(camx, 10, camz, camx+dx, 10, camz+dz, 0.0, 1.0, 0.0);
+    if (is_default_cam) {
+        gluLookAt(camx, 10, camz, camx+dx, 10, camz+dz, 0.0, 1.0, 0.0);
+        
+    } else {
+        //view from spaceship
+        gluLookAt(37, spaceship.height+10, -23, 37, 0, 4, 0.0, 1.0, 0.0);
+    }
     
     glLightfv(GL_LIGHT0, GL_POSITION, light_position);
-    
     
     //Patrol Robot
     glPushMatrix();
@@ -195,13 +280,13 @@ void display (void)
     glPushMatrix();
         glTranslatef(37, 0, -30);
         glColor3f(0.8, 0.8, 0.8);
-        draw_spaceship(spaceship, GL_LIGHT2);
+        draw_spaceship(spaceship, GL_LIGHT2, true);
     glPopMatrix();
     
     
-    glPushMatrix();
+    /*glPushMatrix();
         draw_axis();
-    glPopMatrix();
+    glPopMatrix();*/
     
     
     glPushMatrix();
@@ -210,24 +295,30 @@ void display (void)
         draw_castle(x_castle, y_castle, z_castle, t1_castle, t2_castle, t3_castle, ntri_castle);
     glPopMatrix();
     
-    //Enable specular lighting for cannon and draw cannon
+    
     glPushMatrix();
         glTranslatef(10, 1, 10);
         glScalef(0.06, 0.06, 0.06);
         draw_cannon(x_cannon, y_cannon, z_cannon, t1_cannon, t2_cannon, t3_cannon, ntri_cannon);
     glPopMatrix();
     
-    /*glPushMatrix();
-        glTranslatef(-4, -0.5, 0);
-        glRotatef(29, 0, 1, 0);
-        glRotatef(-90, 1, 0, 0);
-        glScalef(0.3, 0.3, 0.3);
-        draw_paraboloid(25);
-    glPopMatrix();*/
+    
+    //Drawing shadows
+    glDisable(GL_LIGHTING);
+    glPushMatrix();
+        glMultMatrixf(shadow_transformation);
+        glTranslatef(37, 0, -30);
+        glColor3f(0.1, 0.1, 0.1);
+        draw_spaceship(spaceship, -1, false);
+    glPopMatrix();
+    glEnable(GL_LIGHTING);
+    
+    draw_skybox();
     
     //Make sure floor is drawn before any lighting
     glPushMatrix();
-        glScalef(0.5, 1, 0.5);  //@@ change to 0.125 for production
+        glColor3f(119.0/255,136.0/255,153.0/255);
+        glScalef(0.2, 0.2, 0.2);  //@@ change to 0.125 for production
         glTranslatef(0, -1, 0);
         draw_floor();
     glPopMatrix();
@@ -276,7 +367,10 @@ void initialize (void)
     
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glFrustum(-5.0, 5.0, -5.0, 5.0, 10.0, 1000.0);
+    //glFrustum(-5.0, 5.0, -5.0, 5.0, 10.0, 1000.0);
+    gluPerspective(80.0, 1.0, 10.0, 500.0);
+    
+    initialise_skybox(skybox_texture_ids, "./skybox_textures/front.bmp", "./skybox_textures/left.bmp", "./skybox_textures/right.bmp", "./skybox_textures/top.bmp", "./skybox_textures/back.bmp", "./skybox_textures/bottom.bmp");
 }
 
 
@@ -299,6 +393,10 @@ void keyboard(unsigned char key, int x, int y)
     } else if (key == 's') {
         animation_selector(1);
         
+    } else if (key == 'p') {
+        
+        is_default_cam ^= true;
+        glutPostRedisplay();
     }
 }
 

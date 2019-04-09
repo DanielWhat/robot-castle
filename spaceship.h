@@ -50,7 +50,7 @@ void draw_spaceship_body (void);
 
 
 
-void draw_spaceship(Spaceship spaceship, int light);
+void draw_spaceship(Spaceship spaceship, int light, bool color_legs);
 /* Draws a spaceship body, legs and lights. Takes a spaceship object and
  * light parameter (i.e GL_LIGHT2) */
 
