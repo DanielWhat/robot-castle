@@ -137,6 +137,12 @@ void draw_spaceship_legs(void)
             draw_paraboloid(10);
         glPopMatrix();
         
+        glPushMatrix();
+            glColor3f(0.0, 0.0, 1.0);
+            glTranslate3f(0, 5, 10);
+            glutSolidSphere(0.15, 15, 15);
+        glPopMatrix();
+        
     glPopMatrix();
     
     //glMaterialfv(GL_FRONT, GL_SPECULAR, black_s);
