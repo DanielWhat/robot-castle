@@ -3,12 +3,18 @@
 
 #include <GL/freeglut.h>
 #include <math.h>
+#include <stdlib.h>     
+#include <time.h>  
 #include "open_off.h"
 
 void initialise_castle_textures(void);
 /* Initialise textures needed to properly display the castle */
 
 
+void draw_single_grass(void);
+/* Draws a small grass patch intended to surround the castle */
+
+void draw_grass (void);
 
 void draw_octagon(int x, int y, int z);
 /* Takes the normal vector to the octagon and draws an octagon at with 

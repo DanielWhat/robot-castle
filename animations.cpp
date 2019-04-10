@@ -13,6 +13,7 @@
 #include "robot.h"
 #include "animations.h"
 #include "spaceship.h"
+#include "cannon.h"
 
 #include <iostream>
 #include <fstream>
@@ -78,7 +79,157 @@ void toggle_eyes (Robot* robot)
 
 
 
-void animate_worker_robot(Robot* robot, void (*callback) (int), int callback_data)
+void nothing (int data) {
+    
+    
+}
+
+
+void normalise_vector (float* x, float* y)
+/* Given an x and y coordinate of a vector, will calculate the unit 
+ * vector and update x and y accordingly.*/
+{
+    float vector_magnitude = 0;
+    vector_magnitude = sqrt(*x * *x + *y * *y);
+    if (*x != 0 || *y != 0) {
+        *x /= (vector_magnitude + 0.0);
+        *y /= (vector_magnitude + 0.0);
+    }
+}
+
+
+float get_angle_between_2_vectors (float x1, float y1, float x2, float y2) 
+/* Returns a float which is the angle of the two vectors in radians */
+{
+    float dot_product = x1 * x2 + y1 * y2;
+    float magnitude_v1 = sqrt(x1 * x1 + y1 * y1);
+    float magnitude_v2 = sqrt(x2 * x2 + y2 * y2);
+    
+    if ((x1 == 0 && y1 == 0) || (x2 == 0 && y2 == 0)) {
+        return 0;
+        
+    } else {
+        return acos(dot_product / (magnitude_v1 * magnitude_v2));
+    }
+}
+
+
+
+void animate_all_robots (Robot* robot_1, Robot* robot_2, void (*callback) (int), int callback_data)
+/* Makes calls to all animate robot functions. Using this function 
+ * yeilds better performance that calling all the robot animations
+ * individually. */
+{
+    //the callback never occurs so doesn't matter what we give it as a callback
+    animate_patrol_robot(robot_1, nothing, -1, false); 
+    
+    //the callback never occurs so doesn't matter what we give it as a callback
+    animate_worker_robot(robot_2, nothing, -1, false); 
+    
+    glutPostRedisplay();
+    glutTimerFunc(100, callback, callback_data);
+}
+
+
+
+void animate_reload_robot (Robot* robot, CannonBall* cannonball, void (*callback) (int), int callback_data, bool has_cannon_been_fired, bool use_callback)
+{
+    static bool robot_picked_up_cannonball = false;
+    float direction_vector_x = 0;
+    float direction_vector_z = 0;
+    float angle;
+    float destination_x;
+    float destination_z;
+    
+    //remember the cannon is scaled down by glScalef(0.06, 0.06, 0.06) and translated by glTranslatef(50, 1.8, 10); for this code to make sense
+    if (has_cannon_been_fired) {
+        
+        if (robot_picked_up_cannonball) { //i.e robot is returning with the cannonball
+            destination_x = 50;
+            destination_z = 14;
+            
+        } else { //robot is getting the cannonball
+            destination_x = 50;
+            destination_z = (cannonball->x*0.06 + 10);
+        }
+        
+        //get the vector describing the direction the robot needs to move in
+        direction_vector_x = destination_x - robot->x;
+        direction_vector_z = destination_z - robot->z;
+        
+        //normalise the vector
+        normalise_vector(&direction_vector_x, &direction_vector_z);
+        
+        if (!robot_picked_up_cannonball) {
+            if (robot->z < destination_z || robot->x < destination_x) {
+                robot->x += (robot->x < destination_x) ? direction_vector_x : 0;
+                robot->z += (robot->z < destination_z) ? direction_vector_z : 0;
+                
+            } else if (cannonball->y > 0) {
+                //need to wait for cannonball to fall
+                
+            } else { 
+                robot_picked_up_cannonball = true;
+                robot->right_arm.humerus_forward_angle = -90;
+                cannonball->velocity_x = 0;
+                cannonball->velocity_y = 0;
+                cannonball->velocity_z = 0;
+            }
+        } else {
+            if (robot->z > destination_z || robot->x > destination_x) {
+                robot->x += direction_vector_x;
+                robot->z += direction_vector_z;
+                
+            } else { //robot has returned the cannonball
+                cannonball->in_cannon = true;
+                robot_picked_up_cannonball = false;
+            }
+            
+            //move the cannonball with the robot
+            cannonball->x = (robot->z - 10 - 4.2) * (1/0.06); //-4 to get it in robot's hand
+            cannonball->z = 0.9 * (1/0.06); // move it into robot hand
+            cannonball->y = 3.4 * (1/0.06) ; //height of robot hand
+        }
+        //the robot is by default looking in the direction (0, 0, 1)
+        angle = get_angle_between_2_vectors(0, 1, direction_vector_x, direction_vector_z);
+        robot->angle_y = angle * (180/M_PI);
+        
+    } else { //cannon has not been fired or the robot has just returned the cannonball and the cannon has been reset
+        direction_vector_x = 35 - robot->x;
+        direction_vector_z = -5 - robot->z;
+        
+        normalise_vector(&direction_vector_x, &direction_vector_z);
+        
+        if (robot->z > -5 || robot->x > 35) {
+            robot->x += direction_vector_x;
+            robot->z += direction_vector_z;
+                
+        } else {
+            robot->x = 35;
+            robot->z = -5;
+        }
+        
+        
+        //the robot is by default looking in the direction (0, 0, 1)
+        angle = get_angle_between_2_vectors(0, 1, direction_vector_x, direction_vector_z);
+        robot->angle_y = -angle * (180/M_PI);
+        
+        if (robot->right_arm.humerus_forward_angle <= 0) {
+            robot->right_arm.humerus_forward_angle += 3;
+        }
+    }
+    
+    toggle_eyes(robot);
+    
+    if (use_callback) {
+        glutPostRedisplay();
+        glutTimerFunc(100, callback, callback_data);
+    }
+}
+
+
+
+void animate_worker_robot(Robot* robot, void (*callback) (int), int callback_data, bool use_callback)
 {
     static int counter = 0;
     
@@ -127,13 +278,15 @@ void animate_worker_robot(Robot* robot, void (*callback) (int), int callback_dat
     }
     counter++;
     
-    glutPostRedisplay();
-    glutTimerFunc(100, callback, callback_data);
+    if (use_callback) {
+        glutPostRedisplay();
+        glutTimerFunc(100, callback, callback_data);
+    }
 }
 
 
 
-void animate_patrol_robot(Robot* robot, void (*callback) (int))
+void animate_patrol_robot(Robot* robot, void (*callback) (int), int callback_data, bool use_callback)
 /* Animates the patrol robot when given a Robot* data type. A callback 
  * function is needed asw ell which will call this function when given 
  * an int 0 */
@@ -192,6 +345,8 @@ void animate_patrol_robot(Robot* robot, void (*callback) (int))
     }
     counter++;
     
-    glutPostRedisplay();
-    glutTimerFunc(100, callback, 0);
+    if (use_callback) {
+        glutPostRedisplay();
+        glutTimerFunc(100, callback, callback_data);
+    }
 }

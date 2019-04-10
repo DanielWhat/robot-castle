@@ -2,18 +2,79 @@
 
 #include <GL/freeglut.h>
 #include <math.h>
+#include <stdlib.h>     
+#include <time.h>       
 #include "open_off.h"
 #include "textures.h"
 
+#include <iostream>
+#include <fstream>
+
 static GLuint pillar_texture;
 static GLuint wall_texture;
+static GLuint grass_texture;
+
+static int x_tree_cord[50] = {0};
+static int z_tree_cord[50] = {0};
 
 void initialise_castle_textures(void)
-/* Initialise textures needed to properly display the castle */
+/* Initialise textures and other things needed to properly display the 
+ * castle */
 {
     initialise_textures(&pillar_texture, "./bricks/old_bricks.bmp");
     initialise_textures(&wall_texture, "./bricks/wall.bmp");
+    initialise_textures_tga(&grass_texture, "./diffus.tga");
+    
+    //generate 50 random tree locations
+    srand(time(0));
+    
+    for (int i = 0; i < 50; i++) {
+        x_tree_cord[i] = rand() % 500 - 250;
+        z_tree_cord[i] = rand() % 500 - 250;
+    }
 }
+
+
+void draw_single_grass(void)
+/* Draws a small grass patch intended to surround the castle */
+{
+    //glEnable(GL_BLEND);
+    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_TEXTURE_2D);
+    glEnable(GL_ALPHA_TEST);
+    glAlphaFunc(GL_GREATER,0);
+    glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
+    glBindTexture(GL_TEXTURE_2D, grass_texture);
+    glBegin(GL_QUADS);
+        glNormal3f(0, 0, 1);
+        glTexCoord2f(0, 0); glVertex3f(-2.5, 0, 0);
+        glTexCoord2f(1, 0); glVertex3f(2.5, 0, 0);
+        glTexCoord2f(1, 1); glVertex3f(2.5, 5, 0);
+        glTexCoord2f(0, 1); glVertex3f(-2.5, 5, 0);
+    glEnd();
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_BLEND);
+}
+
+
+void draw_grass (void) 
+{
+    for (int i = 0; i < 50; i++) {
+        glPushMatrix();
+            glTranslatef(x_tree_cord[i], 0, z_tree_cord[i]); 
+            glPushMatrix();
+                draw_single_grass();
+            glPopMatrix();
+            
+            glPushMatrix();
+                glRotatef(90, 0, 1, 0);
+                draw_single_grass();
+            glPopMatrix();
+        glPopMatrix();
+    }    
+}
+
+
 
 
 void draw_octagon(int x, int y, int z)

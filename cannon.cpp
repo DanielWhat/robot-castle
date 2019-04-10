@@ -13,6 +13,9 @@
 #include "cannon.h"
 #include <stdbool.h>
 
+#include <iostream>
+#include <fstream>
+
 //@@@ Need to find a fix for the white and black thing
 static float white_c[4] = {1.0, 1.0, 1.0, 1.0};
 static float black_c[4] = {0.0, 0.0, 0.0, 1.0};
@@ -22,8 +25,8 @@ static float gravity = 1;
 static float friction = 1;
 static bool is_cannon_fired = false;
 int cannon_angle = 20;
-static float cannon_power = 20;
-static CannonBall cannon_ball = {.x = 0, .y = Y_OFFSET, .z = 0, .velocity_x = 0, .velocity_y = 0, .velocity_z = 0};
+static float cannon_power = 40;
+static CannonBall cannon_ball = {.x = 0, .y = Y_OFFSET, .z = 0, .velocity_x = 0, .velocity_y = 0, .velocity_z = 0, .in_cannon = true};
 
 
 void draw_cannon_shadow (const float x[], const float y[], const float z[], const int t1[], const int t2[], const int t3[], int num_triangles)
@@ -59,6 +62,13 @@ void draw_cannon_shadow (const float x[], const float y[], const float z[], cons
 }
 
 
+CannonBall* get_cannonball_pointer (void) 
+/* Returns a cannonball object pointer describing the current location 
+ * of the cannonball */
+{
+    return &cannon_ball;
+}
+
 void update_cannonball_position(void)
 /* Updates the y position of the cannon ball when the cannon is rotated.
  * Only works when the cannon ball is in the cannon */
@@ -76,7 +86,6 @@ void move_cannonball(int data)
 {
     cannon_ball.x += (cannon_ball.x >= 0) ? cannon_ball.velocity_x : 0;
     cannon_ball.y += (cannon_ball.y >= 0) ? cannon_ball.velocity_y : 0;
-    cannon_ball.velocity_y -= gravity;
     
     //If the cannonball is on the ground
     if (cannon_ball.y <= 0) {
@@ -84,11 +93,15 @@ void move_cannonball(int data)
         cannon_ball.y = 0;
         //Cannon ball is now slowing down on the ground
         cannon_ball.velocity_x = (cannon_ball.velocity_x > 0) ? cannon_ball.velocity_x - friction : 0; //But don't let velocity go negative
+        
+    } else { //gravity is still in effect then
+        cannon_ball.velocity_y -= gravity;
     }
     
     //The ball is not moving anymore
     if (cannon_ball.velocity_y == 0 && cannon_ball.velocity_x == 0) {
         //nothing
+        
         
     } else {
         glutTimerFunc(50, move_cannonball, 0);
@@ -106,8 +119,21 @@ void fire_cannon()
     cannon_ball.velocity_y = sin(cannon_angle * (M_PI / 180)) * cannon_power;
     
     is_cannon_fired = true;
+    cannon_ball.in_cannon = false;
     
     move_cannonball(0);
+}
+
+
+void reset_cannonball(void) 
+{
+    cannon_ball.x = 0;
+    cannon_ball.y = Y_OFFSET; 
+    cannon_ball.z = 0;
+    cannon_ball.velocity_x = 0;
+    cannon_ball.velocity_y = 0;
+    cannon_ball.velocity_z = 0;
+    cannon_ball.in_cannon = true;
 }
 
 

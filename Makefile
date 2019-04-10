@@ -21,7 +21,7 @@ robot.o: robot.cpp robot.h
 textures.o: textures.cpp textures.h
 	$(CC) -c $(CFLAGS) $< -o $@
 	
-animations.o: animations.cpp animations.h robot.h spaceship.h
+animations.o: animations.cpp animations.h robot.h spaceship.h cannon.h
 	$(CC) -c $(CFLAGS) $< -o $@
 	
 spaceship.o: spaceship.cpp spaceship.h

@@ -2,6 +2,7 @@
 #define TEXTURES_H
 
 #include <GL/freeglut.h>
+#include <stdbool.h>
 #include <fstream>
 
 using namespace std;
@@ -17,6 +18,7 @@ void initialise_textures(GLuint* texId, std::string filename);
 /* Initialises textures for use on any object. Only works with BMP 
  * files. */
 
+void initialise_textures_tga(GLuint* texId, char* filename);
 
 
 void enable_quadratic_textures(GLuint* texId, GLUquadricObj* p);

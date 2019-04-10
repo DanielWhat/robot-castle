@@ -10,8 +10,8 @@
 static GLuint spaceship_texture;
 
 /* @@@ */
-static float white_s[4] = {1.0, 1.0, 1.0, 1.0};
-static float black_s[4] = {0.0, 0.0, 0.0, 1.0};
+//static float white_s[4] = {1.0, 1.0, 1.0, 1.0};
+//static float black_s[4] = {0.0, 0.0, 0.0, 1.0};
 
 
 void normalm(float x1, float y1, float z1,
@@ -33,6 +33,8 @@ void initialise_spaceship(int light)
 {
     float white[4] = {1.0, 1.0, 1.0, 1.0};
     float grey[4] = {0.2, 0.2, 0.2, 1.0};
+    //float red_s[4] = {1.0, 0.0, 0.0, 1.0};
+    //float dark_red_s[4] = {0.4, 0.0, 0.0, 1.0};
     
     initialise_textures(&spaceship_texture, "13777.bmp");
     

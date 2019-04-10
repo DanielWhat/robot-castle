@@ -3,7 +3,7 @@
 
 #ifndef CANNON_H
 #define CANNON_H
-#define GL_SILENCE_DEPRECATION 0
+
 //an offset to account for the fact that the cannonball may not begin at y = 0 when inside the cannon
 //To understand the formula remember that we want to rotate the ball as if it was at (55, 0) but then 
 //transpose it to (55, 28) so that it fits inside the cannon
@@ -22,6 +22,7 @@ typedef struct cannon_ball_s
     float velocity_x;
     float velocity_y;
     float velocity_z;
+    bool in_cannon;
     
 } CannonBall;
 
@@ -40,6 +41,13 @@ void update_cannonball_position(void);
 void move_cannonball(void);
 /* Updates the cannon ball's position and velocity when it is in motion */
 
+
+void reset_cannonball(void);
+
+
+CannonBall* get_cannonball_pointer (void);
+/* Returns a cannonball object describing the current location of the 
+ * cannonball */
 
 
 void fire_cannon(void);

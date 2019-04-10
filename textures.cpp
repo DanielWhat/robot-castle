@@ -1,9 +1,11 @@
 #define GL_SILENCE_DEPRECATION
 
 #include <GL/freeglut.h>
+#include <stdbool.h>
 #include <fstream>
 #include "textures.h"
 #include "loadBMP.h"
+#include "loadTGA.h"
 
 using namespace std;
 
@@ -70,7 +72,17 @@ void initialise_textures(GLuint* texId, std::string filename)
     glBindTexture(GL_TEXTURE_2D, *texId); //Bind the following file to this texture
     loadBMP(filename);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+}
+
+
+void initialise_textures_tga(GLuint* texId, char* filename) 
+{
+    glGenTextures(1, texId); //Generate texture
+    glBindTexture(GL_TEXTURE_2D, *texId); //Bind the following file to this texture
+    loadTGA(filename);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
 
 void enable_quadratic_textures(GLuint* texId, GLUquadricObj* p)

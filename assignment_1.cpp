@@ -51,24 +51,32 @@ int nvrt_cannon, ntri_cannon;
 //Objects
 Robot robot_1 = {.x = -10, .y = 0, .z = 10, .angle_y = 90, .angle_z = 0, .angle_x = 0, .left_arm = {.humerus_side_angle = 0, .humerus_forward_angle = 0}, .right_arm = {.humerus_side_angle = 0, .humerus_forward_angle = 0},.left_eye = {.r = 1, .g = 0, .b = 0}, .right_eye = {.r = 0, .g = 0, .b = 1}};  
 Robot robot_2 = {.x = -10, .y = 0, .z = 30, .angle_y = 180, .angle_z = 0, .angle_x = 15, .left_arm = {.humerus_side_angle = 0, .humerus_forward_angle = -95}, .right_arm = {.humerus_side_angle = 0, .humerus_forward_angle = -95},.left_eye = {.r = 1, .g = 0, .b = 0}, .right_eye = {.r = 0, .g = 0, .b = 1}};  
+Robot robot_3 = {.x = 35, .y = 0, .z = -5, .angle_y = 0, .angle_z = 0, .angle_x = 0, .left_arm = {.humerus_side_angle = 0, .humerus_forward_angle = 0}, .right_arm = {.humerus_side_angle = 0, .humerus_forward_angle = 0},.left_eye = {.r = 1, .g = 0, .b = 0}, .right_eye = {.r = 0, .g = 0, .b = 1}};  
 
 Spaceship spaceship = {.angle = 0, .height = 0, .leg_height = 0, .is_lights_on = true};
 
+//for takeoff
+bool is_spaceship_taking_off = false;
+
+bool has_cannon_been_fired = false;
+
 GLuint skybox_texture_ids[6];
+
 
 void draw_floor(void)
 {
 	float black[4] = {0};
-	//glNormal3f(0.0, 1.0, 0.0);
     
     glEnable(GL_TEXTURE_2D);
-    glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
+    glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
     glBindTexture(GL_TEXTURE_2D, skybox_texture_ids[5]);
     
-    //glMaterialfv(GL_FRONT, GL_SPECULAR, black); // ensure no specular reflections
+    glMaterialfv(GL_FRONT, GL_SPECULAR, black); // ensure no specular reflections
 
 	//The floor is made up of several tiny squares on a 200x200 grid. Each square has a unit size.
+    glColor3f(0.8, 0.8, 0.8);
 	glBegin(GL_QUADS);
+    glNormal3f(0.0, 1.0, 0.0);
 	for(int i = -250; i < 250; i++)
 	{
 		for(int j = -250;  j < 250; j++)
@@ -208,7 +216,7 @@ void draw_axis (void)
 void animation_selector(int selector)
 {
     if (selector == 0) {
-        animate_patrol_robot(&robot_1, animation_selector);
+        animate_patrol_robot(&robot_1, animation_selector, 0, true);
         
     } else if (selector == 1) {
         animate_spaceship_takeoff(&spaceship, animation_selector, 1);
@@ -217,8 +225,19 @@ void animation_selector(int selector)
         animate_passive_spaceship(&spaceship, animation_selector, 2);
         
     } else if (selector == 3) {
-        animate_worker_robot(&robot_2, animation_selector, 3);
+        animate_worker_robot(&robot_2, animation_selector, 3, true);
         
+    } else if (selector == 4) {
+        animate_all_robots(&robot_1, &robot_2, animation_selector, 4);
+        
+    } else if (selector == 5) {
+        CannonBall* cannonball = get_cannonball_pointer();
+        animate_reload_robot(&robot_3, cannonball, animation_selector, 5, has_cannon_been_fired, true);
+        
+        if (cannonball->in_cannon) {
+            reset_cannonball();
+            has_cannon_been_fired = false;
+        }
     }
 }
 
@@ -226,7 +245,7 @@ void animation_selector(int selector)
 
 void display (void)
 {
-    float light_position[4] = {0, 20, 20, 1};
+    float light_position[4] = {0, 60, -40, 1};
     float spotlight_position[4] = {0, 7, -10, 1};
     float spotlight_direction[4] = {0, -1, 3, 0};
     float shadow_transformation[16] = {light_position[1], 0, 0, 0,
@@ -241,15 +260,25 @@ void display (void)
     dx = cos(angle * (M_PI/180));
     dz = sin(angle * (M_PI/180));
     
+    //don't let camera leave the arena
+    if (camx > 235 || camx < -235) {
+        camx = (camx > 235) ? 235 : -235;
+    }
+    
+    if (camz > 235 || camz < -235) {
+        camz = (camz > 235) ? 235 : -235;
+    }
+    
     if (is_default_cam) {
         gluLookAt(camx, 10, camz, camx+dx, 10, camz+dz, 0.0, 1.0, 0.0);
         
     } else {
         //view from spaceship
-        gluLookAt(37, spaceship.height+10, -23, 37, 0, 4, 0.0, 1.0, 0.0);
+        gluLookAt(37, spaceship.height+10, -23, 37, 5, 4, 0.0, 1.0, 0.0);
     }
     
     glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+    
     
     
     // ***************** DRAWING SHADOWS *****************
@@ -265,7 +294,8 @@ void display (void)
     glPushMatrix();
         glColor3f(0.2, 0.2, 0.2);
         glMultMatrixf(shadow_transformation);
-        glTranslatef(10, 1.8, 10);
+        glTranslatef(50, 1.8, 10);
+        glRotatef(-90, 0, 1, 0);
         glScalef(0.06, 0.06, 0.06);
         draw_cannon_shadow(x_cannon, y_cannon, z_cannon, t1_cannon, t2_cannon, t3_cannon, ntri_cannon);
     glPopMatrix();
@@ -298,8 +328,20 @@ void display (void)
         draw_robot_shadow(robot_1);
     glPopMatrix();
     
+    //Reload robot
+    glPushMatrix();
+        glColor3f(0.2, 0.2, 0.2);
+        glMultMatrixf(shadow_transformation);
+        glTranslatef(robot_3.x, robot_3.y, robot_3.z);
+        glRotatef(robot_3.angle_y, 0, 1, 0);
+        glTranslatef(0, 1, 0);
+        draw_robot_shadow(robot_3);
+    glPopMatrix();
+    
     glEnable(GL_LIGHTING);
     glEnable(GL_TEXTURE_2D);
+    
+     // ***************** DRAWING SHADOWS END *****************
     
     
     //spaceship
@@ -308,6 +350,7 @@ void display (void)
         glColor3f(0.8, 0.8, 0.8);
         draw_spaceship(spaceship, GL_LIGHT2);
     glPopMatrix();
+    
     
     //Patrol Robot
     glPushMatrix();
@@ -319,6 +362,8 @@ void display (void)
         glTranslatef(0, 1, 0); //Move up to origin
         draw_robot(robot_1);
     glPopMatrix();
+    
+    
     
     //Worker Robot
     glPushMatrix();
@@ -337,6 +382,15 @@ void display (void)
     glPopMatrix();
     
     
+    //Reload Robot
+    glPushMatrix();
+        glTranslatef(robot_3.x, robot_3.y, robot_3.z);
+        glRotatef(robot_3.angle_y, 0, 1, 0);
+        glTranslatef(0, 1, 0);
+        draw_robot(robot_3);
+    glPopMatrix();
+    
+    
     /*glPushMatrix();
         draw_axis();
     glPopMatrix();*/
@@ -350,7 +404,8 @@ void display (void)
     
     //cannon and cannonball
     glPushMatrix();
-        glTranslatef(10, 1.8, 10);
+        glTranslatef(50, 1.8, 10);
+        glRotatef(-90, 0, 1, 0);
         glScalef(0.06, 0.06, 0.06);
         draw_cannon(x_cannon, y_cannon, z_cannon, t1_cannon, t2_cannon, t3_cannon, ntri_cannon);
     glPopMatrix();
@@ -363,6 +418,10 @@ void display (void)
         //glScalef(0.2, 0.2, 0.2);  //@@ change to 0.125 for production
         glTranslatef(0, -0.1, 0);
         draw_floor();
+    glPopMatrix();
+    
+    glPushMatrix();
+        draw_grass();
     glPopMatrix();
     
     glutSwapBuffers();
@@ -410,7 +469,7 @@ void initialize (void)
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     //glFrustum(-5.0, 5.0, -5.0, 5.0, 10.0, 1000.0);
-    gluPerspective(80.0, 1.0, 10.0, 500.0);
+    gluPerspective(80.0, 1.0, 10.0, 550.0);
     
     initialise_skybox(skybox_texture_ids, "./skybox_textures/front.bmp", "./skybox_textures/left.bmp", "./skybox_textures/right.bmp", "./skybox_textures/top.bmp", "./skybox_textures/back.bmp", "./skybox_textures/bottom.bmp");
 }
@@ -420,7 +479,10 @@ void initialize (void)
 void keyboard(unsigned char key, int x, int y)
 {
     if (key == 'c') {
-        fire_cannon();
+        if (!has_cannon_been_fired) {
+            fire_cannon();
+            has_cannon_been_fired = true;
+        }
         
     } else if (key == 'w') {
         cannon_angle += (cannon_angle < 86) ? 2 : 0;
@@ -432,8 +494,9 @@ void keyboard(unsigned char key, int x, int y)
         update_cannonball_position();
         glutPostRedisplay();
         
-    } else if (key == 's') {
+    } else if (key == 's' && !is_spaceship_taking_off) {
         animation_selector(1);
+        is_spaceship_taking_off = true; //to only allow spaceshipt to take off once
         
     } else if (key == 'p') {
         
@@ -459,6 +522,8 @@ int main(int argc, char** argv)
     //animation_selector(0);
     //animation_selector(2);
     //animation_selector(3);
+    //animation_selector(4);
+    animation_selector(5);
     glutMainLoop();
     return 0;
 }
