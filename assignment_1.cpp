@@ -274,7 +274,7 @@ void display (void)
         
     } else {
         //view from spaceship
-        gluLookAt(37, spaceship.height+10, -23, 37, 5, 4, 0.0, 1.0, 0.0);
+        gluLookAt(37, spaceship.height+10, -23, 37, -1, 4, 0.0, 1.0, 0.0);
     }
     
     glLightfv(GL_LIGHT0, GL_POSITION, light_position);

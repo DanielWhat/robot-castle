@@ -137,12 +137,6 @@ void draw_spaceship_legs(void)
             draw_paraboloid(10);
         glPopMatrix();
         
-        glPushMatrix();
-            glColor3f(0.0, 0.0, 1.0);
-            glTranslate3f(0, 5, 10);
-            glutSolidSphere(0.15, 15, 15);
-        glPopMatrix();
-        
     glPopMatrix();
     
     //glMaterialfv(GL_FRONT, GL_SPECULAR, black_s);
@@ -151,7 +145,7 @@ void draw_spaceship_legs(void)
 
 
 
-void draw_spaceship_body (void) 
+void draw_spaceship_body (bool is_textures) 
 /* Draws a spaceship body using surfaces of rotation method. Also adds a 
  * modulated texture to the spaceship body. */
 {
@@ -162,9 +156,13 @@ void draw_spaceship_body (void)
     
     float y_tex_cord[19] = {0, 0.07183167024826759, 0.11223310925819929, 0.15097322102694813, 0.20552537848006547, 0.26308104711811175, 0.2799750648682411, 0.30725114359479977, 0.3543587448246648, 0.4623403751161782, 0.505911502392443, 0.5299370997984082, 0.5428504703879912, 0.5655020208517456, 0.5834096438516726, 0.6042933415043925, 0.6416855560974432, 0.7491909696017439, 1.0};
     
-    glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, spaceship_texture);
-    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+    if (is_textures) {
+        glEnable(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, spaceship_texture);
+        glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+    } else {
+        glDisable(GL_TEXTURE_2D);
+    }
     
     int counter = 0;
     
@@ -226,10 +224,10 @@ void draw_spaceship_shadow(Spaceship spaceship, int light)
         glTranslatef(0, spaceship.height, 0);
         glRotatef(spaceship.angle, 0, 1, 0);
         
-        draw_spaceship_body();
+        draw_spaceship_body(false);
         
         //Draw legs
-        glColor3f(0.1, 0.1, 0.1);
+        glColor3f(0.2, 0.2, 0.2);
         glPushMatrix();
             glPushMatrix();
                 glTranslatef(9, spaceship.leg_height, 0);
@@ -252,10 +250,22 @@ void draw_spaceship_shadow(Spaceship spaceship, int light)
             glPopMatrix();
         glPopMatrix();
     glPopMatrix();
-    
-    
-    
-    
+}
+
+
+void draw_spaceship_lights(float rotate_angle, float radius)
+{
+    glPushMatrix();
+        glRotatef(rotate_angle, 0, 1, 0);
+        for (int angle = 0; angle < 360; angle += 10) {
+            glPushMatrix();
+                glRotatef(angle, 0, 1, 0);
+                glColor3f(86/255.0, 145/255.0, 239/255.0);
+                glTranslatef(0, 4.5, radius);
+                glutSolidSphere(0.5, 15, 15);
+            glPopMatrix();
+        }
+    glPopMatrix();
 }
 
 
@@ -263,10 +273,12 @@ void draw_spaceship(Spaceship spaceship, int light)
 /* Draws a spaceship body, legs and lights. Takes a spaceship object and
  * light parameter (i.e GL_LIGHT2) */
 {
+    static float rotate_angle = 0;
+    static float radius_incr = 0;
+    static bool expanding_balls = true;
+    
     float light_pos[4] = {0, 1, 0, 1};
     float light_dir[4] = {0, -1, 0, 0};
-    
-    
     
     glPushMatrix();
         glTranslatef(0, spaceship.height, 0);
@@ -281,7 +293,7 @@ void draw_spaceship(Spaceship spaceship, int light)
             glDisable(light);
         }
         
-        draw_spaceship_body();
+        draw_spaceship_body(true);
         
         //Draw legs
         glPushMatrix();
@@ -305,6 +317,24 @@ void draw_spaceship(Spaceship spaceship, int light)
                 draw_spaceship_legs();
             glPopMatrix();
         glPopMatrix();
+        
+        draw_spaceship_lights(rotate_angle, 12.5 + (1/(1+exp(-radius_incr)))*5);
+        rotate_angle += 2;
+        
+        if (expanding_balls) {
+            radius_incr += 0.5;
+        } else {
+            radius_incr -= 0.5;
+        }
+        
+        if (radius_incr > 6) {
+            expanding_balls = false;
+            
+        } else if (radius_incr < -6) {
+            expanding_balls = true;
+            
+        }
+        
     glPopMatrix();
 }
 

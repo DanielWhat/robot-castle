@@ -44,7 +44,7 @@ void draw_spaceship_legs(void);
 
 
 
-void draw_spaceship_body (void);
+void draw_spaceship_body (bool is_textures);
 /* Draws a spaceship body using surfaces of rotation method. Also adds a 
  * modulated texture to the spaceship body */
 
