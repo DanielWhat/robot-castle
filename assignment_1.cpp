@@ -58,26 +58,29 @@ GLuint skybox_texture_ids[6];
 
 void draw_floor(void)
 {
-	//float white[4] = {1., 1., 1., 1.};
 	float black[4] = {0};
-	glNormal3f(0.0, 1.0, 0.0);
+	//glNormal3f(0.0, 1.0, 0.0);
     
-    glMaterialfv(GL_FRONT, GL_SPECULAR, black);
+    glEnable(GL_TEXTURE_2D);
+    glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
+    glBindTexture(GL_TEXTURE_2D, skybox_texture_ids[5]);
+    
+    //glMaterialfv(GL_FRONT, GL_SPECULAR, black); // ensure no specular reflections
 
-	//The floor is made up of several tiny squares on a 200x200 grid. Each square has a unit size. //@@ change to 1600 for production
+	//The floor is made up of several tiny squares on a 200x200 grid. Each square has a unit size.
 	glBegin(GL_QUADS);
-	for(int i = -800; i < 800; i++)
+	for(int i = -250; i < 250; i++)
 	{
-		for(int j = -800;  j < 800; j++)
+		for(int j = -250;  j < 250; j++)
 		{
-			glVertex3f(i, 0, j);
-			glVertex3f(i, 0, j+1);
-			glVertex3f(i+1, 0, j+1);
-			glVertex3f(i+1, 0, j);
+			glTexCoord2f((250 + i)/500.0, (250 + j)/500.0); glVertex3f(i, 0, j);
+			glTexCoord2f((250 + i)/500.0, (250 + j+1)/500.0); glVertex3f(i, 0, j+1);
+			glTexCoord2f((250 + i+1)/500.0, (250 + j+1)/500.0); glVertex3f(i+1, 0, j+1);
+			glTexCoord2f((250 + i+1)/500.0, (250 + j)/500.0); glVertex3f(i+1, 0, j);
 		}
 	}
+    glDisable(GL_TEXTURE_2D);
 	glEnd();
-    //glMaterialfv(GL_FRONT, GL_SPECULAR, white);
 }
 
 
@@ -223,11 +226,11 @@ void animation_selector(int selector)
 
 void display (void)
 {
-    float light_position[4] = {0, 20, 10, 1};
+    float light_position[4] = {0, 20, 20, 1};
     float spotlight_position[4] = {0, 7, -10, 1};
     float spotlight_direction[4] = {0, -1, 3, 0};
     float shadow_transformation[16] = {light_position[1], 0, 0, 0,
-                                        -light_position[0], 0, light_position[2], -1,
+                                        -light_position[0], 0, -light_position[2], -1,
                                         0, 0, light_position[1], 0,
                                         0, 0, 0, light_position[1]};
     
@@ -248,6 +251,64 @@ void display (void)
     
     glLightfv(GL_LIGHT0, GL_POSITION, light_position);
     
+    
+    // ***************** DRAWING SHADOWS *****************
+    glDisable(GL_LIGHTING);
+    glDisable(GL_TEXTURE_2D);
+    glPushMatrix();
+        glColor3f(0.2, 0.2, 0.2);
+        glMultMatrixf(shadow_transformation);
+        glTranslatef(37, 0, -30);
+        draw_spaceship_shadow(spaceship, -1);
+    glPopMatrix();
+    
+    glPushMatrix();
+        glColor3f(0.2, 0.2, 0.2);
+        glMultMatrixf(shadow_transformation);
+        glTranslatef(10, 1.8, 10);
+        glScalef(0.06, 0.06, 0.06);
+        draw_cannon_shadow(x_cannon, y_cannon, z_cannon, t1_cannon, t2_cannon, t3_cannon, ntri_cannon);
+    glPopMatrix();
+    
+    glPushMatrix();
+        glColor3f(0.2, 0.2, 0.2);
+        glMultMatrixf(shadow_transformation);
+        glTranslatef(robot_2.x, robot_2.y, robot_2.z);
+        glRotatef(robot_2.angle_y, 0, 1, 0);
+        glPushMatrix();
+            glTranslatef(0, 0, 3);
+            glTranslatef(0, 2, 0); //Move up to origin
+            glScalef(1, 2, 1);
+            glutSolidCube(2.0);
+        glPopMatrix();
+        glRotatef(robot_2.angle_x, 1, 0, 0);
+        glTranslatef(0, 1, 0); //Move up to origin
+        draw_robot_shadow(robot_2);
+    glPopMatrix();
+    
+    
+    //Patrol Robot
+    glPushMatrix();
+        glColor3f(0.2, 0.2, 0.2);
+        glMultMatrixf(shadow_transformation);
+        glTranslatef(robot_1.x, robot_1.y, robot_1.z);
+        glRotatef(robot_1.angle_y, 0, 1, 0);
+        glRotatef(robot_1.angle_z, 0, 0, 1);
+        glTranslatef(0, 1, 0); //Move up to origin
+        draw_robot_shadow(robot_1);
+    glPopMatrix();
+    
+    glEnable(GL_LIGHTING);
+    glEnable(GL_TEXTURE_2D);
+    
+    
+    //spaceship
+    glPushMatrix();
+        glTranslatef(37, 0, -30);
+        glColor3f(0.8, 0.8, 0.8);
+        draw_spaceship(spaceship, GL_LIGHT2);
+    glPopMatrix();
+    
     //Patrol Robot
     glPushMatrix();
         glTranslatef(robot_1.x, robot_1.y, robot_1.z);
@@ -258,7 +319,6 @@ void display (void)
         glTranslatef(0, 1, 0); //Move up to origin
         draw_robot(robot_1);
     glPopMatrix();
-    
     
     //Worker Robot
     glPushMatrix();
@@ -277,49 +337,31 @@ void display (void)
     glPopMatrix();
     
     
-    glPushMatrix();
-        glTranslatef(37, 0, -30);
-        glColor3f(0.8, 0.8, 0.8);
-        draw_spaceship(spaceship, GL_LIGHT2, true);
-    glPopMatrix();
-    
-    
     /*glPushMatrix();
         draw_axis();
     glPopMatrix();*/
     
-    
+    //castle
     glPushMatrix();
         glTranslatef(20, 0, 0);
         glScalef(2, 2, 2);
         draw_castle(x_castle, y_castle, z_castle, t1_castle, t2_castle, t3_castle, ntri_castle);
     glPopMatrix();
     
-    
+    //cannon and cannonball
     glPushMatrix();
-        glTranslatef(10, 1, 10);
+        glTranslatef(10, 1.8, 10);
         glScalef(0.06, 0.06, 0.06);
         draw_cannon(x_cannon, y_cannon, z_cannon, t1_cannon, t2_cannon, t3_cannon, ntri_cannon);
     glPopMatrix();
-    
-    
-    //Drawing shadows
-    glDisable(GL_LIGHTING);
-    glPushMatrix();
-        glMultMatrixf(shadow_transformation);
-        glTranslatef(37, 0, -30);
-        glColor3f(0.1, 0.1, 0.1);
-        draw_spaceship(spaceship, -1, false);
-    glPopMatrix();
-    glEnable(GL_LIGHTING);
     
     draw_skybox();
     
     //Make sure floor is drawn before any lighting
     glPushMatrix();
-        glColor3f(119.0/255,136.0/255,153.0/255);
-        glScalef(0.2, 0.2, 0.2);  //@@ change to 0.125 for production
-        glTranslatef(0, -1, 0);
+        //glColor3f(119.0/255,136.0/255,153.0/255);
+        //glScalef(0.2, 0.2, 0.2);  //@@ change to 0.125 for production
+        glTranslatef(0, -0.1, 0);
         draw_floor();
     glPopMatrix();
     
@@ -414,9 +456,9 @@ int main(int argc, char** argv)
     glutDisplayFunc(display);
     glutSpecialFunc(special);
     glutKeyboardFunc(keyboard);
-    animation_selector(0);
-    animation_selector(2);
-    animation_selector(3);
+    //animation_selector(0);
+    //animation_selector(2);
+    //animation_selector(3);
     glutMainLoop();
     return 0;
 }

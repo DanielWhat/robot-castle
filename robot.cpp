@@ -94,6 +94,107 @@ void draw_robot_wheel(GLUquadricObj* p)
 }
 
 
+void draw_robot_shadow(Robot robot)
+/* Draws a robot without colours for the purposes of drawing robot shadows */
+{
+    //Draw wheel
+    GLUquadricObj* p = gluNewQuadric();
+    
+    //drawing robot wheel
+    glPushMatrix();
+        glRotatef(90, 0, 1, 0);
+        glutSolidTorus(0.2, 0.8, 30, 30);
+    glPopMatrix();
+    
+    //Draw middle spoke
+    glPushMatrix();
+        glTranslatef(-0.25, 0, 0);
+        glRotatef(90, 0, 1, 0);
+        gluCylinder(p, 0.1, 0.1, 0.5, 8, 8);
+    glPopMatrix();
+    
+    //left bar
+    glPushMatrix();
+        glTranslatef(-0.65, 1.65, 0);
+        glRotatef(15, 0, 0, 1);
+        glRotatef(90, 1, 0, 0);
+        gluCylinder(p, 0.1, 0.1, 1.7, 8, 8);
+    glPopMatrix();
+    
+    //right bar
+    glPushMatrix();
+        glTranslatef(0.65, 1.65, 0);
+        glRotatef(-15, 0, 0, 1);
+        glRotatef(90, 1, 0, 0);
+        gluCylinder(p, 0.1, 0.1, 1.7, 8, 8);
+    glPopMatrix();
+    
+    //Draw body
+    //Robot body
+    glPushMatrix();
+        glTranslatef(0, 3.2, 0);
+        glRotatef(90, 1, 0, 0);
+        gluCylinder(p, 0.8, 0.8, 1.9, 30, 30);
+    glPopMatrix();
+    
+    //Robot head
+    glPushMatrix();
+        glTranslatef(0, 3.5, 0);
+        glutSolidSphere(1.8/2, 30, 30);
+    glPopMatrix();
+    
+    //Robot Arm left
+    glPushMatrix();
+        glTranslatef(-0.9, 2.5, 0);
+        glRotatef(robot.left_arm.humerus_side_angle, 0, 0, 1);
+        glRotatef(robot.left_arm.humerus_forward_angle, 1, 0, 0);
+        glRotatef(90, 1, 0, 0);
+        glutSolidSphere(0.15, 15, 15);
+        glPushMatrix();
+            glTranslatef(0, 0, 1 + 0.15/2);
+            glutSolidSphere(0.15, 15, 15);
+        glPopMatrix();
+        gluCylinder(p, 0.15, 0.15, 1, 8, 8);
+    glPopMatrix();
+    
+    //Robot Arm right
+    glPushMatrix();
+        glTranslatef(0.9, 2.5, 0);
+        glRotatef(robot.right_arm.humerus_side_angle, 0, 0, 1);
+        glRotatef(robot.right_arm.humerus_forward_angle, 1, 0, 0);
+        glRotatef(90, 1, 0, 0);
+        glutSolidSphere(0.15, 15, 15);
+        glPushMatrix();
+            glTranslatef(0, 0, 1 + 0.15/2);
+            glutSolidSphere(0.15, 15, 15);
+        glPopMatrix();
+        gluCylinder(p, 0.15, 0.15, 1, 8, 8);
+    glPopMatrix();
+    
+    //Robot eye right
+    glPushMatrix();
+        glTranslatef(0.4, 3.7, 0.8);
+        glutSolidSphere(0.15, 15, 15);
+    glPopMatrix();
+    
+    //Robot eye left
+    glPushMatrix();
+        glTranslatef(-0.4, 3.7, 0.8);
+        glutSolidSphere(0.15, 15, 15);
+    glPopMatrix();
+    
+    //Mouth
+    glPushMatrix();
+        glTranslatef(-0.27, 3.3, 0.9);
+        glBegin(GL_QUADS);
+            glVertex3f(0, 0, 0);
+            glVertex3f(0.5, 0, 0);
+            glVertex3f(0.5, 0.1, 0);
+            glVertex3f(0, 0.1, 0);
+        glEnd();
+    glPopMatrix();
+}
+
 
 void draw_robot(Robot robot)
 /* Takes a robot object in order to properly draw the robots features 
@@ -101,10 +202,14 @@ void draw_robot(Robot robot)
 {
     //Draw wheel
     GLUquadricObj* p = gluNewQuadric();
-    draw_robot_wheel(p);
+    glPushMatrix();
+        draw_robot_wheel(p);
+    glPopMatrix();
     
     //Draw body
-    draw_robot_body(p);
+    glPushMatrix();
+        draw_robot_body(p);
+    glPopMatrix();
     
     glMaterialfv(GL_FRONT, GL_SPECULAR, white_r); //Enable specular light 
     

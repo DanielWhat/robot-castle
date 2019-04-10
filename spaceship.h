@@ -49,8 +49,13 @@ void draw_spaceship_body (void);
  * modulated texture to the spaceship body */
 
 
+void draw_spaceship_shadow(Spaceship spaceship, int light);
+/* A copy of the draw_spaceship function but without any built in colors
+ * to allow the user to draw shadows */
 
-void draw_spaceship(Spaceship spaceship, int light, bool color_legs);
+
+
+void draw_spaceship(Spaceship spaceship, int light);
 /* Draws a spaceship body, legs and lights. Takes a spaceship object and
  * light parameter (i.e GL_LIGHT2) */
 

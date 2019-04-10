@@ -27,6 +27,9 @@ typedef struct cannon_ball_s
 
 extern int cannon_angle;
 
+void draw_cannon_shadow (const float x[], const float y[], const float z[], const int t1[], const int t2[], const int t3[], int num_triangles);
+/* Draws a version of the cannon without colors for shadows */
+
 
 void update_cannonball_position(void);
 /* Updates the y position of the cannon ball when the cannon is rotated.

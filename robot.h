@@ -36,6 +36,9 @@ typedef struct robot_s
 } Robot;
 
 
+void draw_robot_shadow(Robot robot);
+/* Draws a robot without colours for the purposes of drawing robot shadows */
+
 
 void draw_robot_body(GLUquadricObj* p);
 /* Draws a robot body including the buttons on the front of the body. 

@@ -82,7 +82,6 @@ float my_round(float x, int decimal_places)
 
 void draw_paraboloid(int height)
 {
-    
     glPushMatrix();
         for (float y = 0; y < height-1; y += 0.1) {
             glBegin(GL_TRIANGLE_STRIP);
@@ -118,7 +117,7 @@ void draw_paraboloid(int height)
 
 void draw_spaceship_legs(void)
 {
-    glMaterialfv(GL_FRONT, GL_SPECULAR, white_s);
+    //glMaterialfv(GL_FRONT, GL_SPECULAR, white_s);
     
     glPushMatrix();
     glScalef(0.278, 0.278, 0.278);
@@ -138,7 +137,7 @@ void draw_spaceship_legs(void)
         
     glPopMatrix();
     
-    glMaterialfv(GL_FRONT, GL_SPECULAR, black_s);
+    //glMaterialfv(GL_FRONT, GL_SPECULAR, black_s);
     
 }
 
@@ -154,7 +153,6 @@ void draw_spaceship_body (void)
     float new_x[19], new_y[19], new_z[19];
     
     float y_tex_cord[19] = {0, 0.07183167024826759, 0.11223310925819929, 0.15097322102694813, 0.20552537848006547, 0.26308104711811175, 0.2799750648682411, 0.30725114359479977, 0.3543587448246648, 0.4623403751161782, 0.505911502392443, 0.5299370997984082, 0.5428504703879912, 0.5655020208517456, 0.5834096438516726, 0.6042933415043925, 0.6416855560974432, 0.7491909696017439, 1.0};
-    
     
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, spaceship_texture);
@@ -212,8 +210,48 @@ void draw_spaceship_body (void)
 }
 
 
+void draw_spaceship_shadow(Spaceship spaceship, int light)
+/* A copy of the draw_spaceship function but without any built in colors
+ * to allow the user to draw shadows */
+{
+    glPushMatrix();
+        glTranslatef(0, spaceship.height, 0);
+        glRotatef(spaceship.angle, 0, 1, 0);
+        
+        draw_spaceship_body();
+        
+        //Draw legs
+        glColor3f(0.1, 0.1, 0.1);
+        glPushMatrix();
+            glPushMatrix();
+                glTranslatef(9, spaceship.leg_height, 0);
+                draw_spaceship_legs();
+            glPopMatrix();
+            
+            glPushMatrix();
+                glTranslatef(-9, spaceship.leg_height, 0);
+                draw_spaceship_legs();
+            glPopMatrix();
+            
+            glPushMatrix();
+                glTranslatef(0, spaceship.leg_height, -9);
+                draw_spaceship_legs();
+            glPopMatrix();
+            
+            glPushMatrix();
+                glTranslatef(0, spaceship.leg_height, 9);
+                draw_spaceship_legs();
+            glPopMatrix();
+        glPopMatrix();
+    glPopMatrix();
+    
+    
+    
+    
+}
 
-void draw_spaceship(Spaceship spaceship, int light, bool color_legs)
+
+void draw_spaceship(Spaceship spaceship, int light)
 /* Draws a spaceship body, legs and lights. Takes a spaceship object and
  * light parameter (i.e GL_LIGHT2) */
 {
@@ -239,9 +277,6 @@ void draw_spaceship(Spaceship spaceship, int light, bool color_legs)
         
         //Draw legs
         glPushMatrix();
-            if (color_legs) {
-                glColor3f(0.6, 0.6, 0.6);
-            }
             glPushMatrix();
                 glTranslatef(9, spaceship.leg_height, 0);
                 draw_spaceship_legs();

@@ -26,6 +26,39 @@ static float cannon_power = 20;
 static CannonBall cannon_ball = {.x = 0, .y = Y_OFFSET, .z = 0, .velocity_x = 0, .velocity_y = 0, .velocity_z = 0};
 
 
+void draw_cannon_shadow (const float x[], const float y[], const float z[], const int t1[], const int t2[], const int t3[], int num_triangles)
+/* Draws a version of the cannon without colors for shadows */
+{
+    //Draw metal cannon
+    glPushMatrix();
+        glRotatef(cannon_angle, 0, 0, 1);
+        glTranslatef(15, -30, 0);
+        draw_off_file(x, y, z, t1, t2, t3, num_triangles);
+    glPopMatrix();
+
+    //Draw cannonball
+    glPushMatrix();
+        glTranslatef(cannon_ball.x, cannon_ball.y - Y_OFFSET, cannon_ball.z);
+        glRotatef(cannon_angle, 0, 0, 1);
+        glTranslatef(55, 0, 0);
+        glutSolidSphere(5.0, 50, 50);
+    glPopMatrix();
+    glMaterialf(GL_FRONT, GL_SHININESS, 30); //reset shininess
+    
+    //Draw wooden brace @@@ <-- Texture this
+    glPushMatrix();
+        glTranslatef(15.0, -10.0, 16);
+        glScalef(60, 40, 5);
+        glutSolidCube(1.0);
+    glPopMatrix();
+    glPushMatrix();
+        glTranslatef(15.0, -10.0, -16);
+        glScalef(60, 40, 5);
+        glutSolidCube(1.0);
+    glPopMatrix();
+}
+
+
 void update_cannonball_position(void)
 /* Updates the y position of the cannon ball when the cannon is rotated.
  * Only works when the cannon ball is in the cannon */

@@ -11,8 +11,8 @@ static GLuint wall_texture;
 void initialise_castle_textures(void)
 /* Initialise textures needed to properly display the castle */
 {
-    initialise_textures(&pillar_texture, "gold_energy.bmp");
-    initialise_textures(&wall_texture, "gold_energy.bmp");
+    initialise_textures(&pillar_texture, "./bricks/old_bricks.bmp");
+    initialise_textures(&wall_texture, "./bricks/wall.bmp");
 }
 
 
@@ -166,23 +166,22 @@ void draw_castle_walls(void)
     glPushMatrix();
         glRotatef(90 + asin(7.5 / 15) * (180 / M_PI), 0, 1, 0);
         glTranslatef(15/2.0, 9/2.0, 0);
-        glColor3f(1.0, 0.0, 0.0);
+        glColor3f(0.7, 0.7, 0.7);
         draw_single_castle_wall();
     glPopMatrix();
     
-    glColor3f(0.0, 0.0, 1.0);
     glPushMatrix();
         glTranslatef(0, 0, -13 * 2);
         glRotatef(-90 - asin(7.5 / 15) * (180 / M_PI), 0, 1, 0);
         glTranslatef(15/2.0, 9/2.0, 0);
-        glColor3f(1.0, 0.0, 0.0);
+        glColor3f(0.7, 0.7, 0.7);
         draw_single_castle_wall();
     glPopMatrix();
     
     glPushMatrix();
         glTranslatef(0, 0, -13 * 2);
         glTranslatef(15/2.0, 9/2.0, 0);
-        glColor3f(1.0, 0.0, 0.0);
+        glColor3f(0.7, 0.7, 0.7);
         draw_single_castle_wall();
     glPopMatrix();
     
@@ -190,7 +189,7 @@ void draw_castle_walls(void)
         glTranslatef(15, 0, -13 * 2);
         glRotatef(-90 + asin(7.5 / 15) * (180 / M_PI), 0, 1, 0);
         glTranslatef(15/2.0, 9/2.0, 0);
-        glColor3f(1.0, 0.0, 0.0);
+        glColor3f(0.7, 0.7, 0.7);
         draw_single_castle_wall();
     glPopMatrix();
     
@@ -198,7 +197,7 @@ void draw_castle_walls(void)
         glTranslatef(15 + 7.5, 0, -13);
         glRotatef(-90 - asin(7.5 / 15) * (180 / M_PI), 0, 1, 0);
         glTranslatef(15/2.0, 9/2.0, 0);
-        glColor3f(1.0, 0.0, 0.0);
+        glColor3f(0.7, 0.7, 0.7);
         draw_single_castle_wall();
     glPopMatrix();
 }
@@ -211,21 +210,21 @@ void draw_castle(const float x_castle[], const float y_castle[], const float z_c
     /* *** ENTRANCE *** */
     //Right entrance pillar
     glPushMatrix();
-        glColor3f(0, 0, 1.0);
+        glColor3f(0.7, 0.7, 0.7);
         glRotatef(-90, 1, 0, 0);
         draw_pillar(14);
     glPopMatrix();
     
     //castle castle entrance
     glPushMatrix();
-        glColor3f(0, 0, 0.6);
+        glColor3f(0.4, 0.4, 0.4);
         glTranslatef((sqrt(0.5) + 0.6) / 2, 0, (sqrt(0.5) + 0.6) / 2);
         draw_off_file(x_castle, y_castle, z_castle, t1_castle, t2_castle, t3_castle, num_triangles_castle);
     glPopMatrix();
     
     //Left entrance pillar
     glPushMatrix();
-        glColor3f(0, 0, 1.0);
+        glColor3f(0.7, 0.7, 0.7);
         glTranslatef(15, 0, 0);
         glRotatef(-90, 1, 0, 0);
         draw_pillar(14);
