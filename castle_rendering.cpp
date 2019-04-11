@@ -197,6 +197,7 @@ void draw_pillar (int height)
 {
     //Draws the bottom of the pillar (an octagon)
     glPushMatrix();
+        glColor3f(0.2, 0.2, 0.2);
         glTranslatef(0, 0, 0.01);
         draw_octagon(0, 0, -1);
     glPopMatrix();
@@ -207,6 +208,7 @@ void draw_pillar (int height)
     enable_quadratic_textures(&pillar_texture, p);
     
     glPushMatrix();
+        glColor3f(0.7, 0.7, 0.7);
         glRotatef(0, 1, 0, 0);
         gluCylinder(p, sqrt(0.5) + 0.6, sqrt(0.5) + 0.6, height, 8, 8);
     glPopMatrix();
@@ -215,7 +217,8 @@ void draw_pillar (int height)
     
     //Draws the top of the pillar (an octagon)
     glPushMatrix();
-        glTranslatef(0, 0, 9.99);
+        glColor3f(0.2, 0.2, 0.2);
+        glTranslatef(0, 0, height-0.01);
         draw_octagon(0, 0, 1);
     glPopMatrix();
 }
@@ -311,9 +314,6 @@ void draw_castle_walls(void)
 /* Draws the surrounding castle walls and supporting pillars which 
  * surround the castle. */
 {
-    //Drawing the surrounding small pillars
-    draw_castle_minor_pillars();
-    
     //Drawing connecting walls
     glPushMatrix();
         glRotatef(90 + asin(7.5 / 15) * (180 / M_PI), 0, 1, 0);
@@ -352,6 +352,11 @@ void draw_castle_walls(void)
         glColor3f(0.7, 0.7, 0.7);
         draw_single_castle_wall();
     glPopMatrix();
+    
+    //Drawing the surrounding small pillars
+    glPushMatrix();
+        draw_castle_minor_pillars();
+    glPopMatrix();
 }
 
 
@@ -362,7 +367,6 @@ void draw_castle(const float x_castle[], const float y_castle[], const float z_c
     /* *** ENTRANCE *** */
     //Right entrance pillar
     glPushMatrix();
-        glColor3f(0.7, 0.7, 0.7);
         glRotatef(-90, 1, 0, 0);
         draw_pillar(14);
     glPopMatrix();
@@ -376,7 +380,6 @@ void draw_castle(const float x_castle[], const float y_castle[], const float z_c
     
     //Left entrance pillar
     glPushMatrix();
-        glColor3f(0.7, 0.7, 0.7);
         glTranslatef(15, 0, 0);
         glRotatef(-90, 1, 0, 0);
         draw_pillar(14);

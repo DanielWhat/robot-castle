@@ -56,7 +56,7 @@ Robot robot_1 = {.x = -10, .y = 0, .z = 10, .angle_y = 90, .angle_z = 0, .angle_
 Robot robot_2 = {.x = -10, .y = 0, .z = 30, .angle_y = 180, .angle_z = 0, .angle_x = 15, .left_arm = {.humerus_side_angle = 0, .humerus_forward_angle = -95}, .right_arm = {.humerus_side_angle = 0, .humerus_forward_angle = -95},.left_eye = {.r = 1, .g = 0, .b = 0}, .right_eye = {.r = 0, .g = 0, .b = 1}};  
 Robot robot_3 = {.x = 35, .y = 0, .z = -5, .angle_y = 0, .angle_z = 0, .angle_x = 0, .left_arm = {.humerus_side_angle = 0, .humerus_forward_angle = 0}, .right_arm = {.humerus_side_angle = 0, .humerus_forward_angle = 0},.left_eye = {.r = 1, .g = 0, .b = 0}, .right_eye = {.r = 0, .g = 0, .b = 1}};  
 
-Spaceship spaceship = {.angle = 0, .height = 0, .leg_height = 0, .is_lights_on = true};
+Spaceship spaceship = {.angle = 0, .height = 0, .leg_height = 0, .is_lights_on = true, .x = 0, .z = 0};
 
 //for takeoff
 bool is_spaceship_taking_off = false;
@@ -254,7 +254,7 @@ void display (void)
         
     } else {
         //view from spaceship
-        gluLookAt(37, spaceship.height+10, -20, 37, -1, 40, 0.0, 1.0, 0.0);
+        gluLookAt(37+spaceship.x, spaceship.height+10, -20+spaceship.z, 37+spaceship.x, -1, 40+spaceship.z, 0.0, 1.0, 0.0);
     }
     
     glLightfv(GL_LIGHT0, GL_POSITION, light_position);
@@ -326,6 +326,7 @@ void display (void)
     
     //spaceship
     glPushMatrix();
+        glTranslatef(spaceship.x, 0, spaceship.z);
         glTranslatef(37, 0, -30);
         glColor3f(0.8, 0.8, 0.8);
         draw_spaceship(spaceship, GL_LIGHT2);
@@ -537,6 +538,20 @@ void keyboard(unsigned char key, int x, int y)
         
         CannonBall* cannonball = get_cannonball_pointer();
         cannonball->is_bouncy ^= true; 
+        
+    //for controlling spaceship
+    } else if (key == 'i' && spaceship.height > 0) {
+        spaceship.z += 1;
+        
+    } else if (key == 'j' && spaceship.height > 0) {
+        spaceship.x += 1;
+        
+    } else if (key == 'k' && spaceship.height > 0) {
+        spaceship.z -= 1;
+        
+    } else if (key == 'l' && spaceship.height > 0) {
+        spaceship.x -= 1;
+        
     }
 }
 

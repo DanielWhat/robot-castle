@@ -12,6 +12,8 @@ typedef struct spaceship_s {
     float height; 
     float leg_height;
     bool is_lights_on;
+    float x;
+    float z;
     
 } Spaceship;
 
