@@ -21,6 +21,8 @@ void draw_grass (void);
 void draw_pot(void);
 /* Draws a pot for the fountain to go in */
 
+void draw_pot_shadow(void);
+
 
 void draw_fountain (Particle* particle_list[], int num_particles, int camera_angle);
 

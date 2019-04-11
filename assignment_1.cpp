@@ -225,7 +225,7 @@ void animation_selector(int selector)
 
 void display (void)
 {
-    float light_position[4] = {0, 60, -40, 1};
+    float light_position[4] = {0, 60, -45, 1};
     float spotlight_position[4] = {0, 7, -10, 1};
     float spotlight_direction[4] = {0, -1, 3, 0};
     float shadow_transformation[16] = {light_position[1], 0, 0, 0,
@@ -279,6 +279,21 @@ void display (void)
         glScalef(0.06, 0.06, 0.06);
         draw_cannon_shadow(x_cannon, y_cannon, z_cannon, t1_cannon, t2_cannon, t3_cannon, ntri_cannon);
     glPopMatrix();
+    
+    glPushMatrix();
+        glMultMatrixf(shadow_transformation);
+        glTranslatef(60, 0, 16);
+        glColor3f(0.2, 0.2, 0.2);
+        draw_pot_shadow();
+    glPopMatrix();
+    
+    glPushMatrix();
+        glMultMatrixf(shadow_transformation);
+        glTranslatef(10, 0, 16);
+        glColor3f(0.2, 0.2, 0.2);
+        draw_pot_shadow();
+    glPopMatrix();
+    
     
     glPushMatrix();
         glColor3f(0.2, 0.2, 0.2);

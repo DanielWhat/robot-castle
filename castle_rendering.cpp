@@ -126,10 +126,11 @@ void draw_pot(void)
 
 void draw_pot_shadow(void) 
 {
-    
-    
-    
-    
+    glPushMatrix();
+        glTranslatef(0, -0.2, 0); // move it down slightly so that you can't see that water at the bottom
+        glScalef(0.5, 0.5, 0.5);
+        draw_pot();
+    glPopMatrix();
 }
 
 
