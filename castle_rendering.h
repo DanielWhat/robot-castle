@@ -6,6 +6,8 @@
 #include <stdlib.h>     
 #include <time.h>  
 #include "open_off.h"
+#include "spaceship.h"
+#include "particle.h"
 
 void initialise_castle_textures(void);
 /* Initialise textures needed to properly display the castle */
@@ -15,6 +17,12 @@ void draw_single_grass(void);
 /* Draws a small grass patch intended to surround the castle */
 
 void draw_grass (void);
+
+void draw_pot(void);
+/* Draws a pot for the fountain to go in */
+
+
+void draw_fountain (Particle* particle_list[], int num_particles, int camera_angle);
 
 void draw_octagon(int x, int y, int z);
 /* Takes the normal vector to the octagon and draws an octagon at with 

@@ -12,6 +12,9 @@
 #include "animations.h"
 #include "spaceship.h"
 #include "textures.h"
+#include "particle.h"
+#include <stdlib.h>
+#include <time.h>
 
 //#include "loadBMP.h"
 
@@ -61,6 +64,11 @@ bool is_spaceship_taking_off = false;
 bool has_cannon_been_fired = false;
 
 GLuint skybox_texture_ids[6];
+
+
+//particles
+int num_particles = 2000;
+Particle* particle_list[2000];
 
 
 void draw_floor(void)
@@ -391,6 +399,18 @@ void display (void)
     glPopMatrix();
     
     
+    //particles and fountain
+    glPushMatrix();
+        glTranslatef(60, 0, 16);
+        draw_fountain(particle_list, num_particles, angle);
+    glPopMatrix();
+    
+    glPushMatrix();
+        glTranslatef(10, 0, 16);
+        draw_fountain(particle_list, num_particles, angle);
+    glPopMatrix();
+    
+    
     /*glPushMatrix();
         draw_axis();
     glPopMatrix();*/
@@ -414,11 +434,9 @@ void display (void)
     
     //Make sure floor is drawn before any lighting
     glPushMatrix();
-        //glColor3f(119.0/255,136.0/255,153.0/255);
-        //glScalef(0.2, 0.2, 0.2);  //@@ change to 0.125 for production
         glTranslatef(0, -0.1, 0);
         draw_floor();
-    glPopMatrix();
+    glPopMatrix();    
     
     glPushMatrix();
         draw_grass();
@@ -472,6 +490,19 @@ void initialize (void)
     gluPerspective(80.0, 1.0, 10.0, 550.0);
     
     initialise_skybox(skybox_texture_ids, "./skybox_textures/front.bmp", "./skybox_textures/left.bmp", "./skybox_textures/right.bmp", "./skybox_textures/top.bmp", "./skybox_textures/back.bmp", "./skybox_textures/bottom.bmp");
+    
+    for (int i = 0; i < num_particles; i++) {
+        particle_list[i] = new Particle;
+        
+    }
+    
+     srand(time(0));
+    
+    //fire all the particles
+    for (int i = 0; i < num_particles; i++) {
+        fire_particle(particle_list[i]);
+        
+    }
 }
 
 
@@ -522,7 +553,7 @@ int main(int argc, char** argv)
     //animation_selector(0);
     //animation_selector(2);
     //animation_selector(3);
-    //animation_selector(4);
+    animation_selector(4);
     animation_selector(5);
     glutMainLoop();
     return 0;

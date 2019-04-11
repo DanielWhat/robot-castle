@@ -6,6 +6,8 @@
 #include <time.h>       
 #include "open_off.h"
 #include "textures.h"
+#include "spaceship.h"
+#include "particle.h"
 
 #include <iostream>
 #include <fstream>
@@ -72,6 +74,103 @@ void draw_grass (void)
             glPopMatrix();
         glPopMatrix();
     }    
+}
+
+
+void draw_pot(void)
+/* Draws a pot for the fountain to go in */
+{
+    
+    float x[21] = {3.9, 4.2, 4.6, 4.8, 4.95, 5, 4.75, 4.4, 4.1, 3.9, 4, 4.25, 5, 5.5, 6, 6.2, 6, 5.5, 5, 4.5, 4.5};
+    float y[21] = {8, 9.1, 9.8, 10.1, 10.2, 10, 9.7, 9, 8, 6.5, 5, 4.5, 4, 3.6, 3, 2.5, 1.6, 1, 0.7, 0.2, 0};
+    float z[21] = {0};
+    float new_x[19], new_y[19], new_z[19];
+    
+    int counter = 0;
+    
+    //Do the following enugh times to complete an entire rotation
+    for (int j = 0; j < 365; j+=5) {
+        
+        //Create the new x, y, z coordinates. The new coords are a small rotation about y axis of the previous ones 
+        for (int i = 0; i < 19; i++) {
+            new_x[i] = cos(5 * (M_PI/180)) * x[i] + sin(5 * (M_PI/180)) * z[i];
+            new_y[i] = y[i];
+            new_z[i] = -sin(5 * (M_PI/180)) * x[i] + cos(5 * (M_PI/180)) * z[i];
+        }
+        
+        //Join new x, y, z and old x, y, z to make a triangle strip which will be a small "slice" of the spaceship
+        glBegin(GL_TRIANGLE_STRIP);
+            for (int i = 0; i < 19; i++) {
+                if (i > 0) {
+                    normalm(new_x[i-1], new_y[i-1], new_z[i-1],
+                            x[i-1], y[i-1], z[i-1],
+                            x[i], y[i], z[i]);
+                }
+                glVertex3f(x[i], y[i], z[i]);
+                
+                if (i > 0) {
+                    normalm(new_x[i-1], new_y[i-1], new_z[i-1],
+                            x[i], y[i], z[i],
+                            new_x[i], new_y[i], new_z[i]);
+                }
+                glVertex3f(new_x[i], new_y[i], new_z[i]);
+            }
+        glEnd();
+        
+        //Before we move on to the next stage, let the old x, y, z be equal to the new x, y, z
+        for (int i = 0; i < 19; i++) {
+            x[i] = new_x[i];
+            y[i] = new_y[i];
+            z[i] = new_z[i];
+        }
+        
+        counter++;
+        
+        if (counter >= 3) {
+            counter = 0;
+        }
+    }
+}
+
+void draw_pot_shadow(void) 
+{
+    
+    
+    
+    
+}
+
+
+void draw_fountain (Particle* particle_list[], int num_particles, int camera_angle)
+/* draws the fountain and updates the water particles */
+{
+    update_particles(particle_list, num_particles);
+    
+    glPushMatrix();
+        //Draw fountain
+        glPushMatrix();
+            glTranslatef(0, -0.2, 0); // move it down slightly so that you can't see that water at the bottom
+            glScalef(0.5, 0.5, 0.5);
+            glColor3f(242/255.0, 225/255.0, 203/255.0);
+            draw_pot();
+        glPopMatrix();
+        
+        //draw water particles
+        for (int i = 0; i < num_particles; i++) {
+            glPushMatrix();
+                glColor3f(86/255.0, 145/255.0, 239/255.0);
+                glTranslatef(particle_list[i]->x, particle_list[i]->y, particle_list[i]->z); 
+                glRotatef(90 - camera_angle, 0, 1, 0);
+                glBegin(GL_QUADS);
+                    glVertex3f(0, 0, 0);
+                    glVertex3f(0.1, 0, 0);
+                    glVertex3f(0.1, 0.1, 0);
+                    glVertex3f(0, 0.1, 0);
+                glEnd();
+            glPopMatrix();
+        }
+    glPopMatrix(); 
+    
 }
 
 
@@ -278,7 +377,7 @@ void draw_castle(const float x_castle[], const float y_castle[], const float z_c
     
     //castle castle entrance
     glPushMatrix();
-        glColor3f(0.4, 0.4, 0.4);
+        glColor3f(0.5, 0.5, 0.5);
         glTranslatef((sqrt(0.5) + 0.6) / 2, 0, (sqrt(0.5) + 0.6) / 2);
         draw_off_file(x_castle, y_castle, z_castle, t1_castle, t2_castle, t3_castle, num_triangles_castle);
     glPopMatrix();
