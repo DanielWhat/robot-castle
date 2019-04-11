@@ -230,13 +230,19 @@ void animation_selector(int selector)
         animate_spaceship_takeoff(&spaceship, animation_selector, 1);
         
     } else if (selector == 2) {
-        animate_passive_spaceship(&spaceship, animation_selector, 2);
+        animate_passive_spaceship(&spaceship, animation_selector, 2, true);
         
     } else if (selector == 3) {
         animate_worker_robot(&robot_2, animation_selector, 3, true);
         
     } else if (selector == 4) {
-        animate_all_robots(&robot_1, &robot_2, animation_selector, 4);
+        CannonBall* cannonball = get_cannonball_pointer();
+        animate_all(&robot_1, &robot_2, &robot_3, &spaceship, cannonball, has_cannon_been_fired, animation_selector, 4);
+        
+        if (cannonball->in_cannon) {
+            reset_cannonball();
+            has_cannon_been_fired = false;
+        }
         
     } else if (selector == 5) {
         CannonBall* cannonball = get_cannonball_pointer();
@@ -554,7 +560,7 @@ int main(int argc, char** argv)
     //animation_selector(2);
     //animation_selector(3);
     animation_selector(4);
-    animation_selector(5);
+    //animation_selector(5);
     glutMainLoop();
     return 0;
 }

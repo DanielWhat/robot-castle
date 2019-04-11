@@ -86,10 +86,8 @@ void draw_pot(void)
     float z[21] = {0};
     float new_x[19], new_y[19], new_z[19];
     
-    int counter = 0;
-    
     //Do the following enugh times to complete an entire rotation
-    for (int j = 0; j < 365; j+=5) {
+    for (int j = 0; j < 360; j+=5) {
         
         //Create the new x, y, z coordinates. The new coords are a small rotation about y axis of the previous ones 
         for (int i = 0; i < 19; i++) {
@@ -122,12 +120,6 @@ void draw_pot(void)
             x[i] = new_x[i];
             y[i] = new_y[i];
             z[i] = new_z[i];
-        }
-        
-        counter++;
-        
-        if (counter >= 3) {
-            counter = 0;
         }
     }
 }

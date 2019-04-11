@@ -17,8 +17,10 @@ void animate_spaceship_takeoff(Spaceship* spaceship, void (*callback) (int), int
 
 
 
-void animate_passive_spaceship (Spaceship* spaceship, void (*callback) (int), int callback_data);
-/* Animates the spaceships passive/idle animation*/
+void animate_passive_spaceship (Spaceship* spaceship, void (*callback) (int), int callback_data, bool use_callback);
+/* Animates the spaceships passive/idle animation (note that the 
+ * revolving balls animation is handled in spaceship.cpp. This should be
+ * changed later.*/
 
 
 
@@ -41,9 +43,9 @@ float get_angle_between_2_vectors (float x1, float y1, float x2, float y2);
 
 
 
-void animate_all_robots (Robot* robot_1, Robot* robot_2, void (*callback) (int), int callback_data);
-/* Makes calls to all animate robot functions. Using this function 
- * yeilds better performance that calling all the robot animations
+void animate_all (Robot* robot_1, Robot* robot_2, Robot* robot_3, Spaceship* spaceship, CannonBall* cannonball, bool has_cannon_been_fired, void (*callback) (int), int callback_data);
+/* Makes calls to all animate functions. Using this function 
+ * yeilds better performance that calling all the animation functions
  * individually. */
  
  

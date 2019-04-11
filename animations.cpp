@@ -40,13 +40,23 @@ void animate_spaceship_takeoff(Spaceship* spaceship, void (*callback) (int), int
 }
 
 
-void animate_passive_spaceship (Spaceship* spaceship, void (*callback) (int), int callback_data)
-/* Animates the spaceships passive/idle animation*/
+void animate_passive_spaceship (Spaceship* spaceship, void (*callback) (int), int callback_data, bool use_callback)
+/* Animates the spaceships passive/idle animation (note that the 
+ * revolving balls animation is handled in spaceship.cpp. This should be
+ * changed later. */
 {
-    spaceship->is_lights_on = !spaceship->is_lights_on;
+    static int counter = 0;
     
-    glutPostRedisplay();
-    glutTimerFunc(500, callback, callback_data);
+    if (counter % 3 == 0) {
+        spaceship->is_lights_on = !spaceship->is_lights_on;
+        counter = 0;
+    }
+    counter++;
+    
+    if (use_callback) {
+        glutPostRedisplay();
+        glutTimerFunc(500, callback, callback_data);
+    }
 }
 
 
@@ -115,16 +125,19 @@ float get_angle_between_2_vectors (float x1, float y1, float x2, float y2)
 
 
 
-void animate_all_robots (Robot* robot_1, Robot* robot_2, void (*callback) (int), int callback_data)
-/* Makes calls to all animate robot functions. Using this function 
- * yeilds better performance that calling all the robot animations
+void animate_all (Robot* robot_1, Robot* robot_2, Robot* robot_3, Spaceship* spaceship, CannonBall* cannonball, bool has_cannon_been_fired, void (*callback) (int), int callback_data)
+/* Makes calls to all animate functions. Using this function 
+ * yeilds better performance that calling all the animation functions
  * individually. */
 {
-    //the callback never occurs so doesn't matter what we give it as a callback
+    //the callbacks never occur so doesn't matter what we these functions as a callback
     animate_patrol_robot(robot_1, nothing, -1, false); 
     
-    //the callback never occurs so doesn't matter what we give it as a callback
     animate_worker_robot(robot_2, nothing, -1, false); 
+    
+    animate_reload_robot(robot_3, cannonball, nothing, -1, has_cannon_been_fired, false);
+    
+    animate_passive_spaceship(spaceship, nothing, -1, false);
     
     glutPostRedisplay();
     glutTimerFunc(100, callback, callback_data);

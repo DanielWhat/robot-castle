@@ -37,6 +37,8 @@ float my_round(float x, int decimal_places);
 
 
 void draw_paraboloid(int height);
+/* Draws a paraboloid for the equation y = height - x^2 - z^2. Only 
+ * draws it in the positive x and z coordinate space.*/
 
 
 
