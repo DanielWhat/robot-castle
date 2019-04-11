@@ -169,29 +169,6 @@ void draw_skybox(void)
 }
 
 
-void special (int key, int x, int y) 
-{
-    if (key == GLUT_KEY_RIGHT) {
-        angle += 5;
-        
-    } else if (key == GLUT_KEY_LEFT) {
-        angle -= 5;
-        
-    } else if (key == GLUT_KEY_UP) {
-        camera_z_offset -= 3;
-        camx += dx;
-        camz += dz;
-        
-    } else if (key == GLUT_KEY_DOWN) {
-        camera_z_offset += 3;
-        camx += -dx;
-        camz += -dz;
-    }
-
-    glutPostRedisplay();
-}
-
-
 
 void draw_axis (void)
 {
@@ -509,6 +486,34 @@ void initialize (void)
         fire_particle(particle_list[i]);
         
     }
+}
+
+
+
+void special (int key, int x, int y) 
+{
+    if (key == GLUT_KEY_RIGHT) {
+        angle += 5;
+        
+    } else if (key == GLUT_KEY_LEFT) {
+        angle -= 5;
+        
+    } else if (key == GLUT_KEY_UP) {
+        camera_z_offset -= 3;
+        camx += dx;
+        camz += dz;
+        
+    } else if (key == GLUT_KEY_DOWN) {
+        camera_z_offset += 3;
+        camx += -dx;
+        camz += -dz;
+        
+    } else if (key == GLUT_KEY_HOME) {
+        animation_selector(1);
+        is_spaceship_taking_off = true; //to only allow spaceshipt to take off once
+    }
+
+    glutPostRedisplay();
 }
 
 
