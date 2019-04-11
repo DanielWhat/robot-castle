@@ -1,6 +1,6 @@
 # Definitions
 CC = g++
-CFLAGS = -Wall 
+CFLAGS = -w 
 FRAMEWORKS = -framework OpenGL -framework GLUT
 
 UNAME_S := $(shell uname -s)
