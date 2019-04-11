@@ -72,7 +72,7 @@ void load_mesh_file(const char* fname, float* x[], float* y[], float* z[], int* 
 		exit(1);
 	}
 
-	fp_in.ignore(INT_MAX, '\n');				//ignore first line
+	fp_in.ignore(WINT_MAX, '\n');				//ignore first line
 	fp_in >> *num_verticies >> *num_triangles >> ne;			    // read number of vertices, polygons, edges
 
     *x = new float[*num_verticies];                        //create arrays

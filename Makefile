@@ -3,6 +3,11 @@ CC = g++
 CFLAGS = -Wall 
 FRAMEWORKS = -framework OpenGL -framework GLUT
 
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Linux)
+	FRAMEWORKS = -lGL -lGLU - lglut
+endif
+
 #Default target
 all: assignment_1.out
 
