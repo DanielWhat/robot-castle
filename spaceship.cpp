@@ -36,7 +36,7 @@ void initialise_spaceship(int light)
     //float red_s[4] = {1.0, 0.0, 0.0, 1.0};
     //float dark_red_s[4] = {0.4, 0.0, 0.0, 1.0};
     
-    initialise_textures(&spaceship_texture, "13777.bmp");
+    initialise_textures_tga(&spaceship_texture, "diffuse.tga");
     
     glEnable(GL_LIGHT2);
     glLightfv(GL_LIGHT2, GL_AMBIENT, grey);
@@ -262,7 +262,7 @@ void draw_spaceship_lights(float rotate_angle, float radius)
         for (int angle = 0; angle < 360; angle += 10) {
             glPushMatrix();
                 glRotatef(angle, 0, 1, 0);
-                glColor3f(86/255.0, 145/255.0, 239/255.0);
+                glColor3f(80/255.0,69/255.0,19/255.0);
                 glTranslatef(0, 4.5, radius);
                 glutSolidSphere(0.5, 15, 15);
             glPopMatrix();
