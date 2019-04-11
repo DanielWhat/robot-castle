@@ -204,7 +204,7 @@ void animation_selector(int selector)
         animate_patrol_robot(&robot_1, animation_selector, 0, true);
         
     } else if (selector == 1) {
-        animate_spaceship_takeoff(&spaceship, animation_selector, 1);
+        animate_spaceship_takeoff(&spaceship, animation_selector, 1, true);
         
     } else if (selector == 2) {
         animate_passive_spaceship(&spaceship, animation_selector, 2, true);
@@ -214,7 +214,7 @@ void animation_selector(int selector)
         
     } else if (selector == 4) {
         CannonBall* cannonball = get_cannonball_pointer();
-        animate_all(&robot_1, &robot_2, &robot_3, &spaceship, cannonball, has_cannon_been_fired, animation_selector, 4);
+        animate_all(&robot_1, &robot_2, &robot_3, &spaceship, cannonball, has_cannon_been_fired, is_spaceship_taking_off, animation_selector, 4);
         
         if (cannonball->in_cannon) {
             reset_cannonball();
@@ -265,7 +265,7 @@ void display (void)
         
     } else {
         //view from spaceship
-        gluLookAt(37, spaceship.height+10, -23, 37, -1, 4, 0.0, 1.0, 0.0);
+        gluLookAt(37, spaceship.height+10, -20, 37, -1, 40, 0.0, 1.0, 0.0);
     }
     
     glLightfv(GL_LIGHT0, GL_POSITION, light_position);
@@ -499,21 +499,21 @@ void special (int key, int x, int y)
         angle -= 5;
         
     } else if (key == GLUT_KEY_UP) {
-        camera_z_offset -= 3;
+        camera_z_offset -= 2;
         camx += dx;
         camz += dz;
         
     } else if (key == GLUT_KEY_DOWN) {
-        camera_z_offset += 3;
+        camera_z_offset += 2;
         camx += -dx;
         camz += -dz;
         
     } else if (key == GLUT_KEY_HOME) {
-        animation_selector(1);
-        is_spaceship_taking_off = true; //to only allow spaceshipt to take off once
+        is_default_cam ^= true;
+        glutPostRedisplay();
     }
 
-    glutPostRedisplay();
+    //glutPostRedisplay();
 }
 
 
@@ -529,15 +529,14 @@ void keyboard(unsigned char key, int x, int y)
     } else if (key == 'w') {
         cannon_angle += (cannon_angle < 86) ? 2 : 0;
         update_cannonball_position();
-        glutPostRedisplay();
+        //glutPostRedisplay();
         
     } else if (key == 'a') {
         cannon_angle -= (cannon_angle > -10) ? 2 : 0;
         update_cannonball_position();
-        glutPostRedisplay();
+        //glutPostRedisplay();
         
     } else if (key == 's' && !is_spaceship_taking_off) {
-        animation_selector(1);
         is_spaceship_taking_off = true; //to only allow spaceshipt to take off once
         
     } else if (key == 'p') {

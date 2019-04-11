@@ -18,7 +18,7 @@
 #include <iostream>
 #include <fstream>
 
-void animate_spaceship_takeoff(Spaceship* spaceship, void (*callback) (int), int callback_data)
+void animate_spaceship_takeoff(Spaceship* spaceship, void (*callback) (int), int callback_data, bool use_callback)
 {
     static float rotate_incr = 0.1;
     static float height_incr = 0.1;
@@ -35,8 +35,10 @@ void animate_spaceship_takeoff(Spaceship* spaceship, void (*callback) (int), int
         spaceship->leg_height += 0.05;
     }
     
-    glutPostRedisplay();
-    glutTimerFunc(100, callback, callback_data);
+    if (use_callback) {
+        glutPostRedisplay();
+        glutTimerFunc(100, callback, callback_data);
+    }
 }
 
 
@@ -47,7 +49,7 @@ void animate_passive_spaceship (Spaceship* spaceship, void (*callback) (int), in
 {
     static int counter = 0;
     
-    if (counter % 3 == 0) {
+    if (counter % 8 == 0) {
         spaceship->is_lights_on = !spaceship->is_lights_on;
         counter = 0;
     }
@@ -125,7 +127,7 @@ float get_angle_between_2_vectors (float x1, float y1, float x2, float y2)
 
 
 
-void animate_all (Robot* robot_1, Robot* robot_2, Robot* robot_3, Spaceship* spaceship, CannonBall* cannonball, bool has_cannon_been_fired, void (*callback) (int), int callback_data)
+void animate_all (Robot* robot_1, Robot* robot_2, Robot* robot_3, Spaceship* spaceship, CannonBall* cannonball, bool has_cannon_been_fired, bool is_the_spaceship_taking_off, void (*callback) (int), int callback_data)
 /* Makes calls to all animate functions. Using this function 
  * yeilds better performance that calling all the animation functions
  * individually. */
@@ -139,8 +141,12 @@ void animate_all (Robot* robot_1, Robot* robot_2, Robot* robot_3, Spaceship* spa
     
     animate_passive_spaceship(spaceship, nothing, -1, false);
     
+    if (is_the_spaceship_taking_off) {
+        animate_spaceship_takeoff(spaceship, nothing, -1, false);
+    }
+    
     glutPostRedisplay();
-    glutTimerFunc(100, callback, callback_data);
+    glutTimerFunc(1000/60.0, callback, callback_data);
 }
 
 
@@ -236,7 +242,7 @@ void animate_reload_robot (Robot* robot, CannonBall* cannonball, void (*callback
     
     if (use_callback) {
         glutPostRedisplay();
-        glutTimerFunc(100, callback, callback_data);
+        glutTimerFunc(16, callback, callback_data);
     }
 }
 
