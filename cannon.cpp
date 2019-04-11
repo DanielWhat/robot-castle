@@ -25,8 +25,8 @@ static float gravity = 1;
 static float friction = 1;
 static bool is_cannon_fired = false;
 int cannon_angle = 20;
-static float cannon_power = 40;
-static CannonBall cannon_ball = {.x = 0, .y = Y_OFFSET, .z = 0, .velocity_x = 0, .velocity_y = 0, .velocity_z = 0, .in_cannon = true};
+static float cannon_power = 25;
+static CannonBall cannon_ball = {.x = 0, .y = Y_OFFSET, .z = 0, .velocity_x = 0, .velocity_y = 0, .velocity_z = 0, .in_cannon = true, .is_bouncy = false};
 
 
 void draw_cannon_shadow (const float x[], const float y[], const float z[], const int t1[], const int t2[], const int t3[], int num_triangles)
@@ -84,13 +84,33 @@ void update_cannonball_position(void)
 void move_cannonball(int data)
 /* Updates the cannon ball's position and velocity when it is in motion */
 {
+    static float rebound_y_velocity;
+    static int num_bounces = 0;
+    static int counter = 0;
+    
+    if (counter == 0) {
+        rebound_y_velocity = cannon_ball.velocity_y;
+    }
+    
     cannon_ball.x += (cannon_ball.x >= 0) ? cannon_ball.velocity_x : 0;
     cannon_ball.y += (cannon_ball.y >= 0) ? cannon_ball.velocity_y : 0;
     
     //If the cannonball is on the ground
     if (cannon_ball.y <= 0) {
-        
         cannon_ball.y = 0;
+        
+        if (cannon_ball.is_bouncy) {
+            if (num_bounces < 10) {
+                rebound_y_velocity *= 0.5;
+                cannon_ball.velocity_x *= 0.7;
+                cannon_ball.velocity_y = rebound_y_velocity;
+                num_bounces++;
+            } else {
+                
+                cannon_ball.velocity_y = 0;
+            }
+        }
+        
         //Cannon ball is now slowing down on the ground
         cannon_ball.velocity_x = (cannon_ball.velocity_x > 0) ? cannon_ball.velocity_x - friction : 0; //But don't let velocity go negative
         
@@ -100,13 +120,16 @@ void move_cannonball(int data)
     
     //The ball is not moving anymore
     if (cannon_ball.velocity_y == 0 && cannon_ball.velocity_x == 0) {
-        //nothing
-        
+        counter = 0;
+        num_bounces = 0;
         
     } else {
-        glutTimerFunc(50, move_cannonball, 0);
+        glutTimerFunc(20, move_cannonball, 0);
+        counter++;
     }
-    glutPostRedisplay();
+    
+    //counter++;
+    //glutPostRedisplay();
 }
 
 

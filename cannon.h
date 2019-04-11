@@ -23,6 +23,7 @@ typedef struct cannon_ball_s
     float velocity_y;
     float velocity_z;
     bool in_cannon;
+    bool is_bouncy;
     
 } CannonBall;
 

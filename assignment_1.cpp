@@ -22,14 +22,14 @@
 #include <iostream>
 #include <fstream>
 
-int angle = -90;
+int angle = -50;
 int camera_x_offset = 0;
 int camera_z_offset = 0;
 
 float dx = 0;
 float dz = 0;
 float camx = 7.5;
-float camz = 30;
+float camz = 40;
 
 float white[4] = {1.0, 1.0, 1.0, 1.0};
 float grey[4] = {0.2, 0.2, 0.2, 1.0};
@@ -152,17 +152,6 @@ void draw_skybox(void)
         glTexCoord2f(0, 1); glVertex3f(250, 240, 250);
         glTexCoord2f(1, 1); glVertex3f(-250, 240, 250);
     glEnd();
-    
-    
-    //floor
-    /*glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
-    glBindTexture(GL_TEXTURE_2D, skybox_texture_ids[5]);
-    glBegin(GL_QUADS);
-        glTexCoord2f(0, 0); glVertex3f(-250, -10, -250);
-        glTexCoord2f(1, 0); glVertex3f(250, -10, -250);
-        glTexCoord2f(1, 1); glVertex3f(250, -10, 250);
-        glTexCoord2f(0, 1); glVertex3f(-250, -10, 250);
-    glEnd();*/
     
     glDisable(GL_TEXTURE_2D);
     glEnable(GL_LIGHTING);
@@ -543,6 +532,11 @@ void keyboard(unsigned char key, int x, int y)
         
         is_default_cam ^= true;
         glutPostRedisplay();
+        
+    } else if (key == 'b') {
+        
+        CannonBall* cannonball = get_cannonball_pointer();
+        cannonball->is_bouncy ^= true; 
     }
 }
 

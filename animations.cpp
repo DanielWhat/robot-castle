@@ -137,8 +137,9 @@ void animate_all (Robot* robot_1, Robot* robot_2, Robot* robot_3, Spaceship* spa
     
     animate_worker_robot(robot_2, nothing, -1, false); 
     
-    animate_reload_robot(robot_3, cannonball, nothing, -1, has_cannon_been_fired, false);
-    
+    if (!cannonball->is_bouncy) {
+        animate_reload_robot(robot_3, cannonball, nothing, -1, has_cannon_been_fired, false);
+    }
     animate_passive_spaceship(spaceship, nothing, -1, false);
     
     if (is_the_spaceship_taking_off) {
@@ -150,10 +151,50 @@ void animate_all (Robot* robot_1, Robot* robot_2, Robot* robot_3, Spaceship* spa
 }
 
 
+void move_hands_for_walking (Robot* robot, bool is_robot_holding_something) 
+{
+    static bool is_moving_hands_forward = true;
+    
+    // LEFT ARM
+    if (robot->left_arm.humerus_forward_angle < 80 && is_moving_hands_forward) {
+        robot->left_arm.humerus_forward_angle += 20;
+    } else {
+        is_moving_hands_forward = false;
+    }
+    
+    if (robot->left_arm.humerus_forward_angle > -80 && !is_moving_hands_forward) {
+        robot->left_arm.humerus_forward_angle -= 20;
+    } else {
+        is_moving_hands_forward = true;
+    }
+    
+    if (!is_robot_holding_something) {
+        
+        // RIGHT ARM
+        if (robot->right_arm.humerus_forward_angle < 80 && !is_moving_hands_forward) {
+            robot->right_arm.humerus_forward_angle += 20;
+        } else {
+            is_moving_hands_forward = true;
+        }
+        
+        if (robot->right_arm.humerus_forward_angle > -80 && is_moving_hands_forward) {
+            robot->right_arm.humerus_forward_angle -= 20;
+        } else {
+            is_moving_hands_forward = false;
+        }
+        
+    }
+    
+    
+    
+}
+
+
 
 void animate_reload_robot (Robot* robot, CannonBall* cannonball, void (*callback) (int), int callback_data, bool has_cannon_been_fired, bool use_callback)
 {
     static bool robot_picked_up_cannonball = false;
+    static int counter = 0;
     float direction_vector_x = 0;
     float direction_vector_z = 0;
     float angle;
@@ -181,8 +222,8 @@ void animate_reload_robot (Robot* robot, CannonBall* cannonball, void (*callback
         
         if (!robot_picked_up_cannonball) {
             if (robot->z < destination_z || robot->x < destination_x) {
-                robot->x += (robot->x < destination_x) ? direction_vector_x : 0;
-                robot->z += (robot->z < destination_z) ? direction_vector_z : 0;
+                robot->x += (robot->x < destination_x) ? direction_vector_x/2.0 : 0;
+                robot->z += (robot->z < destination_z) ? direction_vector_z/2.0 : 0;
                 
             } else if (cannonball->y > 0) {
                 //need to wait for cannonball to fall
@@ -196,8 +237,8 @@ void animate_reload_robot (Robot* robot, CannonBall* cannonball, void (*callback
             }
         } else {
             if (robot->z > destination_z || robot->x > destination_x) {
-                robot->x += direction_vector_x;
-                robot->z += direction_vector_z;
+                robot->x += direction_vector_x/2.0;
+                robot->z += direction_vector_z/2.0;
                 
             } else { //robot has returned the cannonball
                 cannonball->in_cannon = true;
@@ -209,6 +250,11 @@ void animate_reload_robot (Robot* robot, CannonBall* cannonball, void (*callback
             cannonball->z = 0.9 * (1/0.06); // move it into robot hand
             cannonball->y = 3.4 * (1/0.06) ; //height of robot hand
         }
+        //this is nessesary to fix a bug when robot is holding ball
+        if (cannon_angle > 20) {
+            cannon_angle -= 1;
+        }
+        
         //the robot is by default looking in the direction (0, 0, 1)
         angle = get_angle_between_2_vectors(0, 1, direction_vector_x, direction_vector_z);
         robot->angle_y = angle * (180/M_PI);
@@ -220,8 +266,8 @@ void animate_reload_robot (Robot* robot, CannonBall* cannonball, void (*callback
         normalise_vector(&direction_vector_x, &direction_vector_z);
         
         if (robot->z > -5 || robot->x > 35) {
-            robot->x += direction_vector_x;
-            robot->z += direction_vector_z;
+            robot->x += direction_vector_x/2.0;
+            robot->z += direction_vector_z/2.0;
                 
         } else {
             robot->x = 35;
@@ -238,12 +284,25 @@ void animate_reload_robot (Robot* robot, CannonBall* cannonball, void (*callback
         }
     }
     
-    toggle_eyes(robot);
+    //robot is not back at base
+    if (robot->x != 35 && robot->z != -5) {
+        //then he must be walking
+        move_hands_for_walking(robot, robot_picked_up_cannonball);
+    } else {
+        robot->right_arm.humerus_forward_angle = 0;
+        robot->left_arm.humerus_forward_angle = 0;
+    }
+    
+    if (counter % 3 == 0) {
+        toggle_eyes(robot);
+    }
     
     if (use_callback) {
         glutPostRedisplay();
         glutTimerFunc(16, callback, callback_data);
     }
+    
+    counter++;
 }
 
 
